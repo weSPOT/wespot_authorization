@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>PIM Login</title>
+    <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0"/>
+    <link rel="stylesheet" href="https://code.jquery.com/mobile/1.4.0/jquery.mobile-1.4.0.min.css" />
+    <script src="https://code.jquery.com/jquery-1.10.2.min.js"></script>
+    <script src="https://code.jquery.com/mobile/1.4.0/jquery.mobile-1.4.0.min.js"></script>
+    <script type="text/javascript">
+        (function ($) {
+            $.fn.vAlign = function() {
+                return this.each(function(i){
+                    var h = $(this).height();
+                    var oh = $(this).outerHeight();
+                    var mt = (h + (oh - h)) / 2;
+                    $(this).css("margin-top", "-" + mt + "px");
+                    $(this).css("top", "50%");
+                    $(this).css("position", "absolute");
+                });
+            };
+        })(jQuery);
+
+        (function ($) {
+            $.fn.hAlign = function() {
+                return this.each(function(i){
+                    var w = $(this).width();
+                    var ow = $(this).outerWidth();
+                    var ml = (w + (ow - w)) / 2;
+                    $(this).css("margin-left", "-" + ml + "px");
+                    $(this).css("left", "50%");
+                    $(this).css("position", "absolute");
+                });
+            };
+        })(jQuery);
+
+        $(document).ready(function() {
+            $("#content").vAlign();
+            $("#content").hAlign();
+
+            if (window.location.href.indexOf('incorrectUsername') != -1) {
+                $("#usernameIncorrect").show();
+            } else {
+                $("#usernameIncorrect").hide();
+            }
+
+            if (window.location.href.indexOf('incorrectPassword') != -1) {
+                $("#incorrectPassword").show();
+            } else {
+                $("#incorrectPassword").hide();
+            }
+
+            $('#check-user').submit(function () {
+                return false;
+            });
+
+
+
+        });
+
+        function submitCredentials() {
+            $.ajax({
+                type: 'post',
+                async: 'false',
+                dataType: "json",
+                data: JSON.stringify(
+                        {
+                            username:$('#username').val(),
+                            password:$('#password').val()
+                        }
+                ),
+                contentType: "application/json; charset=utf-8",
+                url: "/oauth/account/authenticate",
+                success: function(data){
+//                    alert(data);
+//                    $.cookie("net.wespot.authToken", data.token);
+                    if (data.error != undefined) {
+                        if (data.error == "username does not exist ") {
+                            $("#usernameIncorrect").show();
+                            $("#incorrectPassword").hide();
+                        }
+                        if (data.error == "password incorrect") {
+                            $("#incorrectPassword").show();
+                            $("#usernameIncorrect").hide();
+                        }
+                    } else {
+                        $("#usernameIncorrect").hide();
+                        $("#incorrectPassword").hide();
+
+                        var params = getQueryParams();
+                        if (params.redirect_uri == undefined) {
+                            alert('login succesfull');
+                        } else {
+                            location.replace("/oauth/auth?redirect_uri="+params.redirect_uri +
+                                    "&client_id="+params.client_id+
+                                    "&response_type="+params.response_type+
+                                    "&scope="+params.scope);
+                        }
+                    }
+                },
+                error: function (request,error) {
+                    // This callback function will trigger on unsuccessful action
+                    alert('Network error has occurred please try again!');
+                }
+            });
+        }
+
+        function getQueryParams() {
+            var qs = document.location.search;
+            qs = qs.split("+").join(" ");
+
+            var params = {}, tokens,
+                    re = /[?&]?([^=]+)=([^&]*)/g;
+
+            while (tokens = re.exec(qs)) {
+                params[decodeURIComponent(tokens[1])]
+                        = decodeURIComponent(tokens[2]);
+            }
+
+            return params;
+        }
+
+
+    </script>
+    <style type="text/css">
+        #check-user
+        {
+            background: #fff;
+            opacity:0.9;
+            font-size: 12px;
+            line-height: 25px;
+        }
+
+        #check-user { width: 90%; }
+        label.error {
+            float: left;
+            color: red;
+            width: 90%;
+            vertical-align: top;
+            font-weight:bold
+        }
+    </style>
+</head>
+<body>
+<div data-role="page" id="first" class="wrapper" data-theme="b" style="background-size: cover;background-image: url('/images/login_background.jpg')">
+    <div data-role="content"  id="content">
+        <form id="check-user" class="ui-body ui-body-a ui-corner-all" data-ajax="true" method="post" onsubmit="return submitCredentials();">
+            <fieldset>
+                <div data-role="fieldcontain">
+                    <input type="text" value="" name="username" id="username" placeholder="username"/>
+                    <label id="usernameIncorrect" for="username" class="error">username incorrect</label>
+                </div>
+                <div data-role="fieldcontain">
+                    <input type="password" value="" name="password" placeholder="password" id="password"/>
+                    <label id="incorrectPassword" for="username" class="error">password incorrect</label>
+                </div>
+                <input type="submit" data-theme="b" name="Login"  value="Submit">
+            </fieldset>
+        </form>
+    </div>
+</div>
+</body>
+</html>
