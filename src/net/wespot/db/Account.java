@@ -1,7 +1,10 @@
 package net.wespot.db;
 
+import com.googlecode.objectify.Key;
 import com.googlecode.objectify.annotation.Entity;
 import com.googlecode.objectify.annotation.Id;
+import com.googlecode.objectify.annotation.Index;
+import com.googlecode.objectify.annotation.Parent;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 
@@ -42,6 +45,9 @@ public class Account {
     String pictureUrl;
 
     String passwordHash;
+
+    @Index
+    Key<School> school;
 
     public Account() {
 
@@ -127,5 +133,13 @@ public class Account {
 
     public void setPasswordHash(String passwordHash) {
         this.passwordHash = passwordHash;
+    }
+
+    public Key<School> getSchool() {
+        return school;
+    }
+
+    public void setSchool(Key<School> school) {
+        this.school = school;
     }
 }

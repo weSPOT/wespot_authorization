@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module type="JAVA_MODULE" version="4">
+  <component name="FacetManager">
+    <facet type="web" name="Web">
+      <configuration>
+        <descriptors>
+          <deploymentDescriptor name="web.xml" url="file://$MODULE_DIR$/web/WEB-INF/web.xml" />
+        </descriptors>
+        <webroots>
+          <root url="file://$MODULE_DIR$/web" relative="/" />
+        </webroots>
+      </configuration>
+    </facet>
+    <facet type="gwt" name="GWT">
+      <configuration>
+        <setting name="compilerMaxHeapSize" value="1024" />
+        <setting name="gwtScriptOutputStyle" value="DETAILED" />
+        <setting name="gwtSdkUrl" value="file://$USER_HOME$/libraries/java/gwt-2.6.1" />
+        <setting name="webFacet" value="Web" />
+      </configuration>
+    </facet>
+    <facet type="google-app-engine" name="Google App Engine">
+      <configuration>
+        <sdk-home-path>$USER_HOME$/libraries/java/appengine-java-sdk-1.9.4</sdk-home-path>
+      </configuration>
+    </facet>
+  </component>
+  <component name="NewModuleRootManager" inherit-compiler-output="true">
+    <exclude-output />
+    <content url="file://$MODULE_DIR$">
+      <sourceFolder url="file://$MODULE_DIR$/src" isTestSource="false" />
+    </content>
+    <orderEntry type="jdk" jdkName="1.7" jdkType="JavaSDK" />
+    <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="library" name="lib1" level="project" />
+    <orderEntry type="library" name="smartgwt 4.0" level="application" />
+    <orderEntry type="library" name="jersey libs" level="application" />
+    <orderEntry type="library" name="AppEngine ORM 1.9.4" level="application" />
+    <orderEntry type="library" name="AppEngine API 1.9.4" level="application" />
+    <orderEntry type="library" name="gwt maps channel servlet" level="application" />
+    <orderEntry type="library" name="commons fileupload-logging" level="application" />
+    <orderEntry type="library" name="commons-csv" level="project" />
+    <orderEntry type="library" name="gwt-user" level="project" />
+  </component>
+</module>
+

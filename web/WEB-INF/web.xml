@@ -4,7 +4,7 @@
          xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee
 	http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd">
 
-    <display-name>Bilyoner API Web Application</display-name>
+    <display-name>WESPOT authencation Web Application</display-name>
 
     <servlet>
         <servlet-name>jersey-servlet</servlet-name>
@@ -18,10 +18,21 @@
         <load-on-startup>1</load-on-startup>
     </servlet>
 
+    <servlet>
+        <servlet-name>uploadCSV</servlet-name>
+        <servlet-class>net.wespot.oauth2.provider.UploadUsers</servlet-class>
+    </servlet>
+
     <servlet-mapping>
         <servlet-name>jersey-servlet</servlet-name>
         <url-pattern>/oauth/*</url-pattern>
     </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>uploadCSV</servlet-name>
+        <url-pattern>/uploadCSV</url-pattern>
+    </servlet-mapping>
+
 
     <filter>
         <filter-name>ObjectifyFilter</filter-name>

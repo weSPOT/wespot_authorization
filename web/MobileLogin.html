@@ -48,6 +48,8 @@
             } else {
                 $("#incorrectPassword").hide();
             }
+
+
         });
 
 
@@ -78,8 +80,23 @@
 
 
     <div data-role="content"  id="content">
-        <form id="check-user" class="ui-body ui-body-a ui-corner-all" data-ajax="false" method="post" action="/oauth/account/authenticateFw">
+        <form id="check-user" class="ui-body ui-body-a ui-corner-all" data-ajax="false" method="post" action="/oauth/account/authenticateFwAndroid">
             <fieldset>
+                <label for="school">School:</label>
+                <select name="school" id="school">
+                    <option value="0">No School</option>
+                    <option value="5700305828184064">Agora, Roermond, Nederland</option>
+                    <option value="5649391675244544">Connect College, Echt, Nederland</option>
+                    <option value="5668600916475904">College De Brink, Laren, Nederland</option>
+                    <option value="5715999101812736">HLAGraz, Graz, Austria</option>
+                    <option value="5639445604728832">Open Universiteit, Nederland</option>
+                    <option value="5659313586569216">ORG, Graz, Austria</option>
+                    <option value="5634472569470976">OULU University, Oulu, Finland</option>
+                    <option value="5629499534213120">Sint-Janscollege, Hoensbroek, Nederland</option>
+
+
+                </select>
+
                 <div data-role="fieldcontain">
 
                     <input type="text" value="" name="username" id="username" placeholder="username"/>

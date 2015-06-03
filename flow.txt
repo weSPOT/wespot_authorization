@@ -1,0 +1,10 @@
+
+https://wespot-arlearn.appspot.com/Login.html?
+        client_id=744046836162&
+        redirect_uri=http%3A%2F%2Finquiry.wespot.net%2Fmod%2Felgg_social_login%2Fvendors%2Fhybridauth%2F%3Fhauth.done%3DweSPOT&
+        response_type=code&
+        scope=profile+email
+
+
+
+https://wespot-arlearn.appspot.com/oauth/auth?client_id=744046836162&redirect_uri=http%3A%2F%2Finquiry.wespot.net%2Fmod%2Felgg_social_login%2Fvendors%2Fhybridauth%2F%3Fhauth.done%3DweSPOT&response_type=code&scope=profile+email
