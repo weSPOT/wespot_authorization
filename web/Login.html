@@ -11,95 +11,6 @@
     <link rel="stylesheet" href="Login.css">
     <script src="jquery-1.9.1.min.js"></script>
     <script src="jquery.mobile-1.4.0.min.js"></script>
-    <script type="text/javascript">
-        $(document).ready(function() {
-            if (window.location.href.indexOf('incorrectUsername') != -1) {
-                $("#usernameIncorrect").show();
-            } else {
-                $("#usernameIncorrect").hide();
-            }
-
-            if (window.location.href.indexOf('incorrectPassword') != -1) {
-                $("#incorrectPassword").show();
-            } else {
-                $("#incorrectPassword").hide();
-            }
-
-            $('#check-user').submit(function () {
-                return false;
-            });
-
-
-
-        });
-
-        function submitCredentials() {
-            var username = $('#username').val();
-            if ($('#school option:selected')[0].value != '0'){
-                username = $('#school option:selected')[0].value +'_'+username;
-            }
-            $.ajax({
-                type: 'post',
-                async: 'false',
-                dataType: "json",
-                data: JSON.stringify(
-                        {
-                            username:username,
-                            password:$('#password').val()
-                        }
-                ),
-                contentType: "application/json; charset=utf-8",
-                url: "/oauth/account/authenticate",
-                success: function(data){
-//                    alert(data);
-//                    $.cookie("net.wespot.authToken", data.token);
-                    if (data.error != undefined) {
-                        if (data.error == "username does not exist ") {
-                            $("#usernameIncorrect").show();
-                            $("#incorrectPassword").hide();
-                        }
-                        if (data.error == "password incorrect") {
-                            $("#incorrectPassword").show();
-                            $("#usernameIncorrect").hide();
-                        }
-                    } else {
-                        $("#usernameIncorrect").hide();
-                        $("#incorrectPassword").hide();
-
-                        var params = getQueryParams();
-                        if (params.redirect_uri == undefined) {
-                            alert('login succesfull');
-                        } else {
-                                    window.location.href = window.location.protocol + "//"+window.location.host+"/oauth/auth?redirect_uri="+params.redirect_uri +                                    "&client_id="+params.client_id+
-                                    "&response_type="+params.response_type+
-                                    "&scope="+params.scope;
-                        }
-                    }
-                },
-                error: function (request,error) {
-                    // This callback function will trigger on unsuccessful action
-                    alert('Network error has occurred please try again!');
-                }
-            });
-        }
-
-        function getQueryParams() {
-            var qs = document.location.search;
-            qs = qs.split("+").join(" ");
-
-            var params = {}, tokens,
-                    re = /[?&]?([^=]+)=([^&]*)/g;
-
-            while (tokens = re.exec(qs)) {
-                params[decodeURIComponent(tokens[1])]
-                        = decodeURIComponent(tokens[2]);
-            }
-
-            return params;
-        }
-
-
-    </script>
     <style type="text/css">
         #check-user
         {
@@ -152,5 +63,8 @@
         </form>
     </div>
 </div>
+
+<script src="Login.js"></script>
+
 </body>
 </html>
