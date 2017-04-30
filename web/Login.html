@@ -7,40 +7,12 @@
     <!--<script src="https://code.jquery.com/jquery-1.10.2.min.js"></script>-->
     <!--<script src="https://code.jquery.com/mobile/1.4.0/jquery.mobile-1.4.0.min.js"></script>-->
 
-    <link rel="stylesheet" href="jquery.mobile-1.4.0.min.css" />
+    <link rel="stylesheet" href="jquery.mobile-1.4.0.min.css">
+    <link rel="stylesheet" href="Login.css">
     <script src="jquery-1.9.1.min.js"></script>
     <script src="jquery.mobile-1.4.0.min.js"></script>
     <script type="text/javascript">
-        (function ($) {
-            $.fn.vAlign = function() {
-                return this.each(function(i){
-                    var h = $(this).height();
-                    var oh = $(this).outerHeight();
-                    var mt = (h + (oh - h)) / 2;
-                    $(this).css("margin-top", "-" + mt + "px");
-                    $(this).css("top", "50%");
-                    $(this).css("position", "absolute");
-                });
-            };
-        })(jQuery);
-
-        (function ($) {
-            $.fn.hAlign = function() {
-                return this.each(function(i){
-                    var w = $(this).width();
-                    var ow = $(this).outerWidth();
-                    var ml = (w + (ow - w)) / 2;
-                    $(this).css("margin-left", "-" + ml + "px");
-                    $(this).css("left", "50%");
-                    $(this).css("position", "absolute");
-                });
-            };
-        })(jQuery);
-
         $(document).ready(function() {
-            $("#content").vAlign();
-            $("#content").hAlign();
-
             if (window.location.href.indexOf('incorrectUsername') != -1) {
                 $("#usernameIncorrect").show();
             } else {
@@ -148,7 +120,7 @@
     </style>
 </head>
 <body>
-<div data-role="page" id="first" class="wrapper" data-theme="b" style="background-size: cover;background-image: url('/images/login_background.jpg')">
+<div data-role="page" id="first" class="wrapper" data-theme="b" style="background-size: cover;background-image: url('./images/login_background.jpg')">
     <div data-role="content"  id="content">
         <form id="check-user" class="ui-body ui-body-a ui-corner-all" data-ajax="true" method="post" onsubmit="return submitCredentials();">
             <fieldset>
