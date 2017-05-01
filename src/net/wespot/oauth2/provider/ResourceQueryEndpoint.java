@@ -54,7 +54,6 @@ public class ResourceQueryEndpoint {
     @Produces("text/html")
     public Response get(@Context javax.servlet.http.HttpServletRequest request) throws OAuthSystemException {
         try {
-
             // Make the OAuth Request out of this request
             OAuthAccessResourceRequest oauthRequest = new OAuthAccessResourceRequest(request,
                     ParameterStyle.QUERY);
@@ -66,50 +65,16 @@ public class ResourceQueryEndpoint {
                     .setError(OAuthError.ResourceResponse.INVALID_TOKEN)
                     .buildHeaderMessage();
 
-            //return Response.status(Response.Status.UNAUTHORIZED).build();
-            System.out.println("query accesstoken "+accessToken);
-           AccessToken at = ObjectifyService.ofy().load().key(Key.create(AccessToken.class, accessToken)).now();
+            System.out.println("query accesstoken " + accessToken);
+            AccessToken at = ObjectifyService.ofy().load().key(Key.create(AccessToken.class, accessToken)).now();
 
             System.out.println(at.getAccount());
 
             Account account = ObjectifyService.ofy().load().ref(at.getAccount()).now();
-           return Response.status(Response.Status.OK).entity(account.toJson()).build();
-
-
-        } catch (OAuthProblemException e) {
-            String errorCode = e.getError();
-            if (OAuthUtils.isEmpty(errorCode)) {
-
-                // Return the OAuth error message
-                OAuthResponse oauthResponse = OAuthRSResponse
-                        .errorResponse(HttpServletResponse.SC_UNAUTHORIZED)
-                        .setRealm(TestContent.RESOURCE_SERVER_NAME)
-                        .buildHeaderMessage();
-
-                // If no error code then return a standard 401 Unauthorized response
-//                return Response.status(Response.Status.UNAUTHORIZED)
-//                        .header(OAuth.HeaderType.WWW_AUTHENTICATE,
-//                                oauthResponse.getHeader(OAuth.HeaderType.WWW_AUTHENTICATE))
-//                        .build();
-                return null;
-            }
-
-            OAuthResponse oauthResponse = OAuthRSResponse
-                    .errorResponse(HttpServletResponse.SC_BAD_REQUEST)
-                    .setRealm(TestContent.RESOURCE_SERVER_NAME)
-                    .setError(e.getError())
-                    .setErrorDescription(e.getDescription())
-                    .setErrorUri(e.getUri())
-                    .buildHeaderMessage();
-
-//            return Response.status(Response.Status.BAD_REQUEST)
-//                    .header(OAuth.HeaderType.WWW_AUTHENTICATE,
-//                            oauthResponse.getHeader(OAuth.HeaderType.WWW_AUTHENTICATE))
-//                    .build();
+            return Response.status(Response.Status.OK).entity(account.toJson()).build();
+        } catch (Exception e) {
             return null;
-
         }
-
     }
 
 }

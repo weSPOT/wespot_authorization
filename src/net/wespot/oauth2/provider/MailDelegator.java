@@ -57,7 +57,7 @@ public class MailDelegator {
         msgBody += "Click the following link to set a new password.";
         msgBody += "</p>";
         msgBody += "<p>";
-        msgBody += "<a href=\""+link+"\">"+link+"</a>";
+        msgBody += "<a href=\"" + link + "\">" + link + "</a>";
         msgBody += "</p>";
         msgBody += "<p>";
         msgBody += "If clicking the link doesn't work you can copy the link into your browser window or type it there directly.</p>";
