@@ -1,10 +1,10 @@
-var $usernameIncorrect = $('#incorrect-username');
+var $incorrectUsername = $('#incorrect-username');
 var $incorrectPassword = $('#incorrect-password');
 
 if (window.location.href.indexOf('incorrectUsername') != -1) {
-  $usernameIncorrect.show();
+  $incorrectUsername.show();
 } else {
-  $usernameIncorrect.hide();
+  $incorrectUsername.hide();
 }
 
 if (window.location.href.indexOf('incorrectPassword') != -1) {
@@ -20,9 +20,11 @@ $('#check-user').submit(function(e) {
 
 function submitCredentials() {
     var username = $('#username').val();
-    var selectedSchool = $('#school-select option:selected').val();
-    if (selectedSchool != 0){
-        username = selectedSchool + '_' + username;
+    if ($('#school-select').length) {
+      var selectedSchool = $('#school-select option:selected').val();
+      if (selectedSchool != 0){
+          username = selectedSchool + '_' + username;
+      }
     }
     $.ajax({
         type: 'post',
@@ -39,19 +41,19 @@ function submitCredentials() {
         success: function(data) {
             if (data.error) {
                 if (data.error == 'username does not exist ') {
-                    $usernameIncorrect.show();
-                    $usernameIncorrect.siblings('input').addClass('error');
+                    $incorrectUsername.show();
+                    $incorrectUsername.siblings('input').addClass('error');
                     $incorrectPassword.hide();
                     $incorrectPassword.siblings('input').removeClass('error');
                 } else if (data.error == 'password incorrect') {
                     $incorrectPassword.show();
                     $incorrectPassword.siblings('input').addClass('error');
-                    $usernameIncorrect.hide();
-                    $usernameIncorrect.siblings('input').removeClass('error');
+                    $incorrectUsername.hide();
+                    $incorrectUsername.siblings('input').removeClass('error');
                 }
             } else {
-                $usernameIncorrect.hide();
-                $usernameIncorrect.siblings('input').removeClass('error');
+                $incorrectUsername.hide();
+                $incorrectUsername.siblings('input').removeClass('error');
                 $incorrectPassword.hide();
                 $incorrectPassword.siblings('input').removeClass('error');
 
