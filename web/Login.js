@@ -37,7 +37,7 @@ function submitCredentials() {
                 }
         ),
         contentType: 'application/json; charset=utf-8',
-        url: 'https://rk02.net/fakewespotauth.php',
+        url: '/oauth/account/authenticate',
         success: function(data) {
             if (data.error) {
                 if (data.error == 'username does not exist ') {
