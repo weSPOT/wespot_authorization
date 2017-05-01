@@ -273,18 +273,7 @@ public class AccountService {
         } catch (OAuthSystemException e) {
             e.printStackTrace();
         } catch (NullPointerException npe) {
-            //TODO for testing only ... remove this
-            JSONObject result = new JSONObject();
-            try {
-                result.put("type", "AuthResponse");
-
-                result.put("token" , "token_12345");
-                result.put("error" , "Could not recover from error");
-                result.put("password" , false);
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-            return Response.ok(result.toString(), MediaType.APPLICATION_JSON).build();
+            npe.printStackTrace();
         }
 
         return null;
@@ -345,16 +334,7 @@ public class AccountService {
         } catch (OAuthSystemException e) {
             e.printStackTrace();
         } catch (NullPointerException npe) {
-            //TODO for testing only ... remove this
-            JSONObject result = new JSONObject();
-            try {
-                result.put("type", "AuthResponse");
-
-                result.put("token" , "token_12345");
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-            return result.toString();
+            npe.printStackTrace();
         }
 //        response.sendRedirect("http://www.google.com");
 //        RequestDispatcher dispatcher =  servletContext.getRequestDispatcher("http://www.google.com");
@@ -427,16 +407,7 @@ public class AccountService {
         } catch (OAuthSystemException e) {
             e.printStackTrace();
         } catch (NullPointerException npe) {
-            //TODO for testing only ... remove this
-            JSONObject result = new JSONObject();
-            try {
-                result.put("type", "AuthResponse");
-
-                result.put("token" , "token_12345");
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-            return result.toString();
+            npe.printStackTrace();
         }
 //        response.sendRedirect("http://www.google.com");
 //        RequestDispatcher dispatcher =  servletContext.getRequestDispatcher("http://www.google.com");
