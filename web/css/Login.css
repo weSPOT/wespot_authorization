@@ -129,3 +129,7 @@ select {
 #check-user .submit-btn:hover {
   background-color: #283593;
 }
+
+#check-user .submit-btn:focus {
+  border-bottom: 0;
+}

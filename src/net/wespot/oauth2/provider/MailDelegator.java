@@ -38,35 +38,12 @@ public class MailDelegator {
 
     private static final Logger logger = Logger.getLogger(MailDelegator.class.getName());
 
-//    public static void sendMail(String from, String fromName, String toMail, String subject, String msgBody) {
-//        String from = "no-reply@" + SystemProperty.applicationId.get() + ".appspotmail.com";
-//        Properties props = new Properties();
-//        Session session = Session.getDefaultInstance(props, null);
-//        try {
-//            Message msg = new MimeMessage(session);
-//            msg.setFrom(new InternetAddress(from, fromName));
-//            msg.addRecipient(Message.RecipientType.TO, new InternetAddress(toMail));
-//            msg.setSubject(subject);
-//
-//            final MimeBodyPart htmlPart = new MimeBodyPart();
-//            htmlPart.setContent(msgBody, "text/html");
-//            final Multipart mp = new MimeMultipart();
-//            mp.addBodyPart(htmlPart);
-//
-//            msg.setContent(mp);
-//            Transport.send(msg);
-//
-//        } catch (Exception e) {
-//            logger.log(Level.SEVERE, e.getMessage(), e);
-//        }
-//    }
-
     public void changePassword(String toMail, String resetId) {
         String from = "no-reply@" + SystemProperty.applicationId.get() + ".appspotmail.com";
 
         Properties props = new Properties();
         Session session = Session.getDefaultInstance(props, null);
-        String link = "http://"+SystemProperty.applicationId.get()+".appspot.com/ResetPassword.jsp?resetId="+resetId;
+        String link = "http://" + SystemProperty.applicationId.get() + ".appspot.com/ResetPassword.jsp?resetId=" + resetId;
 
         String msgBody = "<html><body>";
         msgBody += "Hello,<br>";
@@ -103,7 +80,6 @@ public class MailDelegator {
 
             msg.setContent(mp);
             Transport.send(msg);
-
         } catch (Exception e) {
             logger.log(Level.SEVERE, e.getMessage(), e);
         }
