@@ -15,6 +15,7 @@
       <root url="jar://$PROJECT_DIR$/lib/objectify-4.0b3.jar!/" />
       <root url="jar://$PROJECT_DIR$/lib/appengine-api-1.0-sdk-1.9.51.jar!/" />
       <root url="jar://$PROJECT_DIR$/lib/jersey-bundle-1.17.1.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/asm-3.3.1.jar!/" />
     </CLASSES>
     <JAVADOC />
     <SOURCES>
