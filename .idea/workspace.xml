@@ -2,10 +2,23 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="4c649741-5432-4c5a-a25e-406f21db933e" name="Default" comment="">
+      <change type="DELETED" beforePath="$PROJECT_DIR$/web/Account.css" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/web/Account.html" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/web/Applications.html" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/web/Login.css" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/web/Login.js" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/web/MobileLogin.html" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/web/NewPassword.html" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/web/images/login_background.jp2" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/web/jquery-1.9.1.min.js" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/web/jquery.mobile-1.4.0.min.css" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/web/jquery.mobile-1.4.0.min.js" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/web/test.html" afterPath="" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/web/Account.jsp" afterPath="$PROJECT_DIR$/web/Account.jsp" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/web/Login.html" afterPath="$PROJECT_DIR$/web/Login.html" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/web/Login2.html" afterPath="$PROJECT_DIR$/web/Login2.html" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/web/ResetPassword.html" afterPath="$PROJECT_DIR$/web/ResetPassword.html" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/web/ResetPassword.jsp" afterPath="$PROJECT_DIR$/web/ResetPassword.jsp" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/web/index.jsp" afterPath="$PROJECT_DIR$/web/index.jsp" />
     </list>
     <ignored path="$PROJECT_DIR$/out/" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -80,8 +93,8 @@
       <file leaf-file-name="web.xml" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/web/WEB-INF/web.xml">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="155">
-              <caret line="38" column="47" lean-forward="true" selection-start-line="38" selection-start-column="47" selection-end-line="38" selection-end-column="47" />
+            <state relative-caret-position="185">
+              <caret line="39" column="13" lean-forward="true" selection-start-line="39" selection-start-column="13" selection-end-line="39" selection-end-column="13" />
               <folding />
             </state>
           </provider>
@@ -436,16 +449,16 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1493633381739</updated>
-      <workItem from="1493633388317" duration="8440000" />
+      <workItem from="1493633388317" duration="9467000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="8440000" />
+    <option name="totallyTimeSpent" value="9467000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="17" y="40" width="1260" height="690" extended-state="0" />
-    <editor active="false" />
+    <editor active="true" />
     <layout>
       <window_info id="Palette" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="-1" side_tool="false" content_ui="tabs" />
       <window_info id="Nl-Palette" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="-1" side_tool="false" content_ui="tabs" />
@@ -560,8 +573,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/web/WEB-INF/web.xml">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="155">
-          <caret line="38" column="47" lean-forward="true" selection-start-line="38" selection-start-column="47" selection-end-line="38" selection-end-column="47" />
+        <state relative-caret-position="185">
+          <caret line="39" column="13" lean-forward="true" selection-start-line="39" selection-start-column="13" selection-end-line="39" selection-end-column="13" />
           <folding />
         </state>
       </provider>

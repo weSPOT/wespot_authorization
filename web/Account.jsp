@@ -9,8 +9,8 @@
     <meta charset="UTF-8">
     <title>Create account</title>
     <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0"/>
-    <script src="jquery-1.9.1.min.js"></script>
-    <link rel="stylesheet" href="Login.css">
+
+    <link rel="stylesheet" href="css/Login.css">
 </head>
 <body>
 
