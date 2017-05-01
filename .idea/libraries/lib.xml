@@ -1,0 +1,24 @@
+<component name="libraryTable">
+  <library name="lib">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/lib/servlet-api-2.5.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/amber-oauth2-resourceserver-0.22-incubating.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/appengine-api-labs-1.7.6.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/jersey-multipart-1.0.3.144640.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/guava-14.0.1.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/amber-oauth2-client-0.22-incubating.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/jettison-1.2.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/slf4j-api-1.6.1.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/amber-oauth2-authzserver-0.22-incubating.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/amber-oauth2-common-0.22-incubating.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/jsr311-api-0.10.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/objectify-4.0b3.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/appengine-api-1.0-sdk-1.9.51.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/jersey-bundle-1.17.1.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES>
+      <root url="jar://$PROJECT_DIR$/lib/appengine-api-1.0-sdk-1.9.51.jar!/" />
+    </SOURCES>
+  </library>
+</component>

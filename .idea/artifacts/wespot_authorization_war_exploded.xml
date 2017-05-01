@@ -1,0 +1,17 @@
+<component name="ArtifactManager">
+  <artifact type="exploded-war" build-on-make="true" name="wespot_authorization:war exploded">
+    <output-path>$PROJECT_DIR$/out/artifacts/wespot_authorization_war_exploded</output-path>
+    <root id="root">
+      <element id="directory" name="WEB-INF">
+        <element id="directory" name="classes">
+          <element id="module-output" name="wespot_authorization" />
+        </element>
+        <element id="directory" name="lib">
+          <element id="library" level="project" name="lib" />
+        </element>
+      </element>
+      <element id="javaee-facet-resources" facet="wespot_authorization/web/Web" />
+      <element id="gwt-compiler-output" facet="wespot_authorization/gwt/GWT" />
+    </root>
+  </artifact>
+</component>
