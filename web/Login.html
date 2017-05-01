@@ -4,41 +4,38 @@
     <title>PIM Login</title>
     <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0"/>
 
-    <link rel="stylesheet" href="jquery.mobile-1.4.0.min.css">
     <link rel="stylesheet" href="Login.css">
     <script src="jquery-1.9.1.min.js"></script>
-    <script src="jquery.mobile-1.4.0.min.js"></script>
 </head>
 <body>
-<div data-role="page" id="background" class="wrapper" data-theme="z">
-    <section id="content" data-role="content">
-        <form id="check-user" class="ui-body ui-body-a ui-corner-all" method="post">
-            <fieldset>
-              <label for="school">School:</label>
-              <select name="school" id="school">
-                  <option value="0">No School</option>
-                  <option value="5700305828184064">Agora, Roermond, Nederland</option>
-                  <option value="5649391675244544">Connect College, Echt, Nederland</option>
-                  <option value="5668600916475904">College De Brink, Laren, Nederland</option>
-                  <option value="5715999101812736">HLAGraz, Graz, Austria</option>
-                  <option value="5639445604728832">Open Universiteit, Nederland</option>
-                  <option value="5659313586569216">ORG, Graz, Austria</option>
-                  <option value="5634472569470976">OULU University, Oulu, Finland</option>
-                  <option value="5629499534213120">Sint-Janscollege, Hoensbroek, Nederland</option>
-              </select>
-            </fieldset>
-            <fieldset>
-                <input id="username" name="username" placeholder="Username" type="text">
-                <label id="incorrect-username" for="username" class="error">Incorrect username</label>
-            </fieldset>
-            <fieldset>
-                <input id="password" name="password" placeholder="Password" type="password"/>
-                <label id="incorrect-password" for="password" class="error">Incorrect password</label>
-            </fieldset>
-            <input type="submit" name="login" value="Submit">
-        </form>
-    </section>
-</div>
+<figure id="background"></figure>
+<section id="content" data-role="content">
+    <form id="check-user" method="post">
+        <fieldset>
+            <label class="school-label" for="school">School:</label>
+            <select id="school-select" class="school-select" name="school">
+                <option value="0">No School</option>
+                <option value="5700305828184064">Agora, Roermond, Nederland</option>
+                <option value="5649391675244544">Connect College, Echt, Nederland</option>
+                <option value="5668600916475904">College De Brink, Laren, Nederland</option>
+                <option value="5715999101812736">HLAGraz, Graz, Austria</option>
+                <option value="5639445604728832">Open Universiteit, Nederland</option>
+                <option value="5659313586569216">ORG, Graz, Austria</option>
+                <option value="5634472569470976">OULU University, Oulu, Finland</option>
+                <option value="5629499534213120">Sint-Janscollege, Hoensbroek, Nederland</option>
+            </select>
+        </fieldset>
+        <fieldset>
+            <input id="username" name="username" placeholder="Username" type="text">
+            <label id="incorrect-username" for="username" class="error">Incorrect username</label>
+        </fieldset>
+        <fieldset>
+            <input id="password" name="password" placeholder="Password" type="password"/>
+            <label id="incorrect-password" for="password" class="error">Incorrect password</label>
+        </fieldset>
+        <input class="submit-btn" type="submit" name="login" value="Submit">
+    </form>
+</section>
 
 <script src="Login.js"></script>
 

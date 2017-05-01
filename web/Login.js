@@ -20,7 +20,7 @@ $('#check-user').submit(function(e) {
 
 function submitCredentials() {
     var username = $('#username').val();
-    var selectedSchool = $('#school option:selected').val();
+    var selectedSchool = $('#school-select option:selected').val();
     if (selectedSchool != 0){
         username = selectedSchool + '_' + username;
     }
@@ -40,14 +40,20 @@ function submitCredentials() {
             if (data.error) {
                 if (data.error == 'username does not exist ') {
                     $usernameIncorrect.show();
+                    $usernameIncorrect.siblings('input').addClass('error');
                     $incorrectPassword.hide();
+                    $incorrectPassword.siblings('input').removeClass('error');
                 } else if (data.error == 'password incorrect') {
                     $incorrectPassword.show();
+                    $incorrectPassword.siblings('input').addClass('error');
                     $usernameIncorrect.hide();
+                    $usernameIncorrect.siblings('input').removeClass('error');
                 }
             } else {
                 $usernameIncorrect.hide();
+                $usernameIncorrect.siblings('input').removeClass('error');
                 $incorrectPassword.hide();
+                $incorrectPassword.siblings('input').removeClass('error');
 
                 var params = getQueryParams();
                 if (!params.redirect_uri) {
