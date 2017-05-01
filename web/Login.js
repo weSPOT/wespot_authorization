@@ -1,5 +1,5 @@
-var $usernameIncorrect = $('#usernameIncorrect');
-var $incorrectPassword = $('#incorrectPassword');
+var $usernameIncorrect = $('#incorrect-username');
+var $incorrectPassword = $('#incorrect-password');
 
 if (window.location.href.indexOf('incorrectUsername') != -1) {
   $usernameIncorrect.show();
@@ -13,8 +13,9 @@ if (window.location.href.indexOf('incorrectPassword') != -1) {
   $incorrectPassword.hide();
 }
 
-$('#check-user').submit(function() {
-    return false;
+$('#check-user').submit(function(e) {
+    e.preventDefault();
+    submitCredentials();
 });
 
 function submitCredentials() {
@@ -36,7 +37,7 @@ function submitCredentials() {
         contentType: 'application/json; charset=utf-8',
         url: 'https://rk02.net/fakewespotauth.php',
         success: function(data) {
-            if (data.error != undefined) {
+            if (data.error) {
                 if (data.error == 'username does not exist ') {
                     $usernameIncorrect.show();
                     $incorrectPassword.hide();
@@ -49,7 +50,7 @@ function submitCredentials() {
                 $incorrectPassword.hide();
 
                 var params = getQueryParams();
-                if (params.redirect_uri == undefined) {
+                if (!params.redirect_uri) {
                     alert('Login successful');
                 } else {
                     window.location.href = window.location.origin + '/oauth/auth?' +

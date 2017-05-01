@@ -1,67 +1,43 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <title>PIM Login</title>
     <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0"/>
-    <!--<link rel="stylesheet" href="https://code.jquery.com/mobile/1.4.0/jquery.mobile-1.4.0.min.css" />-->
-    <!--<script src="https://code.jquery.com/jquery-1.10.2.min.js"></script>-->
-    <!--<script src="https://code.jquery.com/mobile/1.4.0/jquery.mobile-1.4.0.min.js"></script>-->
 
     <link rel="stylesheet" href="jquery.mobile-1.4.0.min.css">
     <link rel="stylesheet" href="Login.css">
     <script src="jquery-1.9.1.min.js"></script>
     <script src="jquery.mobile-1.4.0.min.js"></script>
-    <style type="text/css">
-        #check-user
-        {
-            background: #fff;
-            opacity:0.9;
-            font-size: 12px;
-            line-height: 25px;
-        }
-
-        #check-user { width: 90%; }
-        label.error {
-            float: left;
-            color: red;
-            width: 90%;
-            vertical-align: top;
-            font-weight:bold
-        }
-    </style>
 </head>
 <body>
-<div data-role="page" id="first" class="wrapper" data-theme="b" style="background-size: cover;background-image: url('./images/login_background.jpg')">
-    <div data-role="content"  id="content">
-        <form id="check-user" class="ui-body ui-body-a ui-corner-all" data-ajax="true" method="post" onsubmit="return submitCredentials();">
+<div data-role="page" id="background" class="wrapper" data-theme="z">
+    <section id="content" data-role="content">
+        <form id="check-user" class="ui-body ui-body-a ui-corner-all" method="post">
             <fieldset>
-                <label for="school">School:</label>
-                <select name="school" id="school">
-                    <option value="0">No School</option>
-                    <option value="5700305828184064">Agora, Roermond, Nederland</option>
-                    <option value="5649391675244544">Connect College, Echt, Nederland</option>
-                    <option value="5668600916475904">College De Brink, Laren, Nederland</option>
-                    <option value="5715999101812736">HLAGraz, Graz, Austria</option>
-                    <option value="5639445604728832">Open Universiteit, Nederland</option>
-                    <option value="5659313586569216">ORG, Graz, Austria</option>
-                    <option value="5634472569470976">OULU University, Oulu, Finland</option>
-                    <option value="5629499534213120">Sint-Janscollege, Hoensbroek, Nederland</option>
-
-
-                </select>
-
-                <div data-role="fieldcontain">
-                    <input type="text" value="" name="username" id="username" placeholder="username"/>
-                    <label id="usernameIncorrect" for="username" class="error">username incorrect</label>
-                </div>
-                <div data-role="fieldcontain">
-                    <input type="password" value="" name="password" placeholder="password" id="password"/>
-                    <label id="incorrectPassword" for="username" class="error">password incorrect</label>
-                </div>
-                <input type="submit" data-theme="b" name="Login"  value="Submit">
+              <label for="school">School:</label>
+              <select name="school" id="school">
+                  <option value="0">No School</option>
+                  <option value="5700305828184064">Agora, Roermond, Nederland</option>
+                  <option value="5649391675244544">Connect College, Echt, Nederland</option>
+                  <option value="5668600916475904">College De Brink, Laren, Nederland</option>
+                  <option value="5715999101812736">HLAGraz, Graz, Austria</option>
+                  <option value="5639445604728832">Open Universiteit, Nederland</option>
+                  <option value="5659313586569216">ORG, Graz, Austria</option>
+                  <option value="5634472569470976">OULU University, Oulu, Finland</option>
+                  <option value="5629499534213120">Sint-Janscollege, Hoensbroek, Nederland</option>
+              </select>
             </fieldset>
+            <fieldset>
+                <input id="username" name="username" placeholder="Username" type="text">
+                <label id="incorrect-username" for="username" class="error">Incorrect username</label>
+            </fieldset>
+            <fieldset>
+                <input id="password" name="password" placeholder="Password" type="password"/>
+                <label id="incorrect-password" for="password" class="error">Incorrect password</label>
+            </fieldset>
+            <input type="submit" name="login" value="Submit">
         </form>
-    </div>
+    </section>
 </div>
 
 <script src="Login.js"></script>
