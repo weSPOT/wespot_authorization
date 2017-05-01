@@ -1,6 +1,7 @@
 @import url('https://fonts.googleapis.com/css?family=Roboto:300,400,700');
 
 body {
+  background-color: #212121;
   font-family: 'Roboto', sans-serif;
 }
 
@@ -8,7 +9,7 @@ input,
 select {
   width: 100%;
   font: inherit;
-  line-height: 1.5;
+  line-height: 1.6;
   outline-width: 0;
   appearance: none;
   -moz-appearance: none;
@@ -43,16 +44,13 @@ select {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
+  padding: 24px;
   background-color: #FFFFFF;
-  box-shadow: 0 0 40px 0 rgba(0, 0, 0, .4), 0 0 25px 0 rgba(0, 0, 0, .44);
-}
-
-#content {
-  padding: 12px 24px;
+  box-shadow: 0 2px 60px 0 rgba(0, 0, 0, .17);
 }
 
 #check-user fieldset {
-  margin: 12px 0;
+  margin: 18px 0;
   padding: 0;
   border: 0;
 }
@@ -82,18 +80,19 @@ select {
 }
 
 #check-user label.error {
-  margin-top: 2px;
+  margin-top: 4px;
   color: #F44336;
   display: block;
 }
 
 #check-user .school-label {
-  margin-bottom: 2px;
+  margin-bottom: 4px;
   color: #757575;
   display: block;
 }
 
 #check-user .school-select {
+  padding-right: 16px;
   background: none;
   background-position: right center;
   background-size: 12px;
@@ -104,6 +103,7 @@ select {
 }
 
 #check-user .submit-btn {
+  margin-top: 6px;
   padding-top: 6px;
   padding-bottom: 6px;
   color: #FFFFFF;
