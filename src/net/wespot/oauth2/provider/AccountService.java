@@ -120,21 +120,17 @@ public class AccountService {
         return "{}";
     }
 
-    public static Account createAccountStatic (String username, String password, String firstName, String lastName, String email){
-
+    public static Account createAccountStatic (String username, String password, String firstName, String lastName, String email) {
         ObjectifyService.register(Account.class);
 
-            Account accountOfi = new Account(username,username) ;
-            accountOfi.setPasswordHash(hash(password));
+        Account accountOfi = new Account(username, username);
+        accountOfi.setPasswordHash(hash(password));
+        accountOfi.setName(firstName + " " + lastName);
+        accountOfi.setFamilyName(lastName);
+        accountOfi.setGivenName(firstName);
+        accountOfi.setEmail(email);
 
-            accountOfi.setName(firstName+" "+lastName);
-            accountOfi.setFamilyName(lastName);
-            accountOfi.setGivenName(firstName);
-//            if (accountJson.has("pictureUrl")) accountOfi.setPictureUrl(accountJson.getString("pictureUrl"));
-            accountOfi.setEmail(email);
-
-
-            ObjectifyService.ofy().save().entity(accountOfi);
+        ObjectifyService.ofy().save().entity(accountOfi);
         return accountOfi;
     }
 
@@ -163,15 +159,7 @@ public class AccountService {
         if (username != null && !"".equals(username.trim())) {
             Account accountOfi = ObjectifyService.ofy().load().key(Key.create(Account.class, username)).now();
             return accountOfi;
-
         }
-//        if (email!= null && !"".equals(email.trim())) {
-//            List<Account> accounts = ObjectifyService.ofy().load().type(Account.class).filter("email", email.trim()).list();
-//            if (!accounts.isEmpty()) {
-//
-//            }
-//
-//        }
         return null;
     }
 
@@ -189,7 +177,7 @@ public class AccountService {
     }
     @GET
     @Path("/logout")
-    public Response logout( @Context HttpServletRequest request) { //@PathParam("accessToken") String accessToken,
+    public Response logout(@Context HttpServletRequest request) {
 
         try {
             JSONObject result = new JSONObject();
@@ -227,8 +215,8 @@ public class AccountService {
     @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
     @Path("/authenticate")
     public Response authenticate(@DefaultValue("application/json") @HeaderParam("Content-Type") String contentType,
-                               @DefaultValue("application/json") @HeaderParam("Accept") String accept,
-                               String account)  {
+                                 @DefaultValue("application/json") @HeaderParam("Accept") String accept,
+                                 String account)  {
 
         OAuthIssuer oauthIssuerImpl = new OAuthIssuerImpl(new MD5Generator());
         try {
@@ -245,7 +233,7 @@ public class AccountService {
                 }
                 return Response.ok(result.toString(), MediaType.APPLICATION_JSON).build();
             }
-            String password =accountJson.getString("password");
+            String password = accountJson.getString("password");
             if (password == null || !hash(accountJson.getString("password")).equals(accountOfi.getPasswordHash())) {
                 JSONObject result = new JSONObject();
                 try {
@@ -264,16 +252,12 @@ public class AccountService {
             result.put("type", "AuthResponse");
             result.put("token" , at.getIdentifier());
             return Response.ok(result.toString(), MediaType.APPLICATION_JSON)
-                                		.cookie(new NewCookie("net.wespot.authToken", at.getIdentifier(), "/", "wespot-arlearn.appspot.com", "OAuth token cookie", 3600, false))
-                                		.expires(new Date(System.currentTimeMillis() + 3600))
-                                		.build();
+                .cookie(new NewCookie("net.wespot.authToken", at.getIdentifier(), "/", "wespot-arlearn.appspot.com", "OAuth token cookie", 3600, false))
+                .expires(new Date(System.currentTimeMillis() + 3600))
+                .build();
 
-        } catch (JSONException e) {
+        } catch (Exception e) {
             e.printStackTrace();
-        } catch (OAuthSystemException e) {
-            e.printStackTrace();
-        } catch (NullPointerException npe) {
-            npe.printStackTrace();
         }
 
         return null;
@@ -290,45 +274,34 @@ public class AccountService {
                                  @FormParam("originalPage") String originalPage,
                                  @Context ServletContext servletContext)  throws Exception{
 
-
-
         OAuthIssuer oauthIssuerImpl = new OAuthIssuerImpl(new MD5Generator());
         try {
 
             Account accountOfi = null;
             if (username != null && !"".equals(username)) {
-
-
                 accountOfi= ObjectifyService.ofy().load().key(Key.create(Account.class, username)).now();
             }
+
             if (accountOfi == null) {
-                    java.net.URI location = new java.net.URI("../"+originalPage+"?incorrectUsername");
+                    URI location = new URI("../" + originalPage + "?incorrectUsername");
                     throw new WebApplicationException(Response.temporaryRedirect(location).build());
             }
 
             if (password == null || "".equals(password)|| !hash(password).equals(accountOfi.getPasswordHash())) {
-                    java.net.URI location = new java.net.URI("../"+originalPage+"?incorrectPassword");
+                    URI location = new URI("../" + originalPage + "?incorrectPassword");
                     throw new WebApplicationException(Response.temporaryRedirect(location).build());
             }
             AccessToken at = new AccessToken(oauthIssuerImpl.accessToken(), accountOfi);
             ObjectifyService.ofy().save().entity(at).now();
 
-
             String redirect_uri = "http://streetlearn.appspot.com/oauth/wespot";
             String clientId = "wespotstreetlearnid";
-
 
             String code = oauthIssuerImpl.authorizationCode();
             CodeToAccount cta = new CodeToAccount(code, accountOfi);
             ObjectifyService.ofy().save().entity(cta).now();
 
-//            java.net.URI location = new java.net.URI("https://wespot-arlearn.appspot.com/oauth/auth?redirect_uri=http://ar-learn.appspot.com/oauth/wespot&response_type=code&client_id=wespotarlearnid&approval_prompt=force&scope=profile+email");
-
-//            java.net.URI location = new java.net.URI("/auth?redirect_uri="+ redirect_uri+
-//                    "&client_id="+clientId+
-//                    "&response_type=code"+
-//                    "&scope=profile+email");
-            java.net.URI location = new java.net.URI("http://streetlearn.appspot.com/oauth/wespot?code="+code);
+            URI location = new URI("http://streetlearn.appspot.com/oauth/wespot?code="+code);
 
             throw new WebApplicationException(Response.temporaryRedirect(location).build());
         } catch (OAuthSystemException e) {
@@ -336,18 +309,8 @@ public class AccountService {
         } catch (NullPointerException npe) {
             npe.printStackTrace();
         }
-//        response.sendRedirect("http://www.google.com");
-//        RequestDispatcher dispatcher =  servletContext.getRequestDispatcher("http://www.google.com");
-//        dispatcher.forward(request, response);
-
-//        try {
-//
-//        } catch (URISyntaxException e) {
-//            e.printStackTrace();
-//        }
 
         return "<html></html>";
-
     }
 
     @POST
@@ -361,66 +324,13 @@ public class AccountService {
                                  @FormParam("originalPage") String originalPage,
                                  @Context ServletContext servletContext)  throws Exception{
 
-
-
-        OAuthIssuer oauthIssuerImpl = new OAuthIssuerImpl(new MD5Generator());
-        try {
-
-            Account accountOfi = null;
-            if (username != null && !"".equals(username)) {
-                if (school != 0) {
-                    username = school+ "_"+username;
-                }
-
-                accountOfi= ObjectifyService.ofy().load().key(Key.create(Account.class, username)).now();
-            }
-            if (accountOfi == null) {
-                java.net.URI location = new java.net.URI("../"+originalPage+"?incorrectUsername");
-                throw new WebApplicationException(Response.temporaryRedirect(location).build());
-            }
-
-            if (password == null || "".equals(password)|| !hash(password).equals(accountOfi.getPasswordHash())) {
-                java.net.URI location = new java.net.URI("../"+originalPage+"?incorrectPassword");
-                throw new WebApplicationException(Response.temporaryRedirect(location).build());
-            }
-            AccessToken at = new AccessToken(oauthIssuerImpl.accessToken(), accountOfi);
-            ObjectifyService.ofy().save().entity(at).now();
-
-
-            String redirect_uri = "http://streetlearn.appspot.com/oauth/wespot";
-            String clientId = "wespotstreetlearnid";
-
-
-            String code = oauthIssuerImpl.authorizationCode();
-            CodeToAccount cta = new CodeToAccount(code, accountOfi);
-            ObjectifyService.ofy().save().entity(cta).now();
-
-//            java.net.URI location = new java.net.URI("https://wespot-arlearn.appspot.com/oauth/auth?redirect_uri=http://ar-learn.appspot.com/oauth/wespot&response_type=code&client_id=wespotarlearnid&approval_prompt=force&scope=profile+email");
-
-//            java.net.URI location = new java.net.URI("/auth?redirect_uri="+ redirect_uri+
-//                    "&client_id="+clientId+
-//                    "&response_type=code"+
-//                    "&scope=profile+email");
-            java.net.URI location = new java.net.URI("http://streetlearn.appspot.com/oauth/wespot?code="+code);
-
-            throw new WebApplicationException(Response.temporaryRedirect(location).build());
-        } catch (OAuthSystemException e) {
-            e.printStackTrace();
-        } catch (NullPointerException npe) {
-            npe.printStackTrace();
+        if (username != null && !"".equals(username) && school != null && school != 0) {
+            username = school + "_" + username;
         }
-//        response.sendRedirect("http://www.google.com");
-//        RequestDispatcher dispatcher =  servletContext.getRequestDispatcher("http://www.google.com");
-//        dispatcher.forward(request, response);
 
-//        try {
-//
-//        } catch (URISyntaxException e) {
-//            e.printStackTrace();
-//        }
+        authenticateFw(contentType, response, request, school, username, password, originalPage, servletContext);
 
         return "<html></html>";
-
     }
 
 
