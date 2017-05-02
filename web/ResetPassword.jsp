@@ -23,7 +23,7 @@
     String email = request.getParameter("email");
     if (resetId == null && (username != null || email != null)) {
         if (!school.equals("0")) username = school + "_" + username;
-        Account account = AccountService.resetAccountGetAccount(username, email);
+        Account account = AccountService.resetAccountGetAccount(username);
         if (account == null) {
             response.sendRedirect("ResetPassword.html");
         } else {

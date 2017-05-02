@@ -72,15 +72,14 @@ public class AccountService {
 
 
 
-        return "";
+        return "{}";
     }
     @GET
     @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
     @Path("/accountExists/{account}")
-    public String accountExists(@PathParam("account")String account)  {
-        JSONObject result = null;
+    public String accountExists(@PathParam("account") String account) {
         try {
-            result = new JSONObject();
+            JSONObject result = new JSONObject();
             Account accountOfi = ObjectifyService.ofy().load().key(Key.create(Account.class, account)).now();
             result.put("accountExists", accountOfi!= null);
             return result.toString() ;
@@ -94,8 +93,8 @@ public class AccountService {
     @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
     @Path("/createAccount")
     public String createAccount(@DefaultValue("application/json") @HeaderParam("Content-Type") String contentType,
-                                      @DefaultValue("application/json") @HeaderParam("Accept") String accept,
-                                      String account) {
+                                @DefaultValue("application/json") @HeaderParam("Accept") String accept,
+                                String account) {
 
         ObjectifyService.register(Account.class);
 
@@ -120,7 +119,7 @@ public class AccountService {
         return "{}";
     }
 
-    public static Account createAccountStatic (String username, String password, String firstName, String lastName, String email) {
+    public static Account createAccountStatic(String username, String password, String firstName, String lastName, String email) {
         ObjectifyService.register(Account.class);
 
         Account accountOfi = new Account(username, username);
@@ -154,8 +153,7 @@ public class AccountService {
         return "{}";
     }
 
-    public static Account resetAccountGetAccount(String username, String email) {
-
+    public static Account resetAccountGetAccount(String username) {
         if (username != null && !"".equals(username.trim())) {
             Account accountOfi = ObjectifyService.ofy().load().key(Key.create(Account.class, username)).now();
             return accountOfi;
@@ -165,9 +163,8 @@ public class AccountService {
 
     public static AccountReset resetAccount(Account accountOfi) {
         OAuthIssuer oauthIssuerImpl = new OAuthIssuerImpl(new MD5Generator());
-        AccountReset resetEntity = null;
         try {
-            resetEntity = new AccountReset(accountOfi.getIdentifier(),oauthIssuerImpl.authorizationCode());
+            AccountReset resetEntity = new AccountReset(accountOfi.getIdentifier(), oauthIssuerImpl.authorizationCode());
             ObjectifyService.ofy().save().entity(resetEntity).now();
             return resetEntity;
         } catch (OAuthSystemException e) {
@@ -175,6 +172,7 @@ public class AccountService {
         }
         return null;
     }
+
     @GET
     @Path("/logout")
     public Response logout(@Context HttpServletRequest request) {
@@ -200,8 +198,8 @@ public class AccountService {
 
             return Response.ok(result.toString(), MediaType.APPLICATION_JSON)
                     .header(
-                            "Set-Cookie",
-                            "net.wespot.authToken=deleted;Domain=.wespot-arlearn.appspot.com;Path=/;Expires=Thu, 01-Jan-1970 00:00:01 GMT"
+                        "Set-Cookie",
+                        "net.wespot.authToken=deleted;Domain=.wespot-arlearn.appspot.com;Path=/;Expires=Thu, 01-Jan-1970 00:00:01 GMT"
                     )
                     .build();
         } catch (JSONException e) {
@@ -216,39 +214,33 @@ public class AccountService {
     @Path("/authenticate")
     public Response authenticate(@DefaultValue("application/json") @HeaderParam("Content-Type") String contentType,
                                  @DefaultValue("application/json") @HeaderParam("Accept") String accept,
-                                 String account)  {
+                                 String account) {
 
         OAuthIssuer oauthIssuerImpl = new OAuthIssuerImpl(new MD5Generator());
         try {
+            JSONObject result = new JSONObject();
+
             JSONObject accountJson = new JSONObject(account);
             Account accountOfi = ObjectifyService.ofy().load().key(Key.create(Account.class, accountJson.getString("username"))).now();
             if (accountOfi == null) {
-                JSONObject result = new JSONObject();
-                try {
-                    result.put("type", "AuthResponse");
-                    result.put("error" , "username does not exist ");
-                    result.put("userName" , false);
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
+                result.put("type", "AuthResponse");
+                result.put("error" , "username does not exist ");
+                result.put("userName" , false);
+
                 return Response.ok(result.toString(), MediaType.APPLICATION_JSON).build();
             }
             String password = accountJson.getString("password");
-            if (password == null || !hash(accountJson.getString("password")).equals(accountOfi.getPasswordHash())) {
-                JSONObject result = new JSONObject();
-                try {
-                    result.put("type", "AuthResponse");
-                    result.put("error" , "password incorrect");
-                    result.put("password" , false);
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
+            if (password == null || !hash(password).equals(accountOfi.getPasswordHash())) {
+                result.put("type", "AuthResponse");
+                result.put("error" , "password incorrect");
+                result.put("password" , false);
+
                 return Response.ok(result.toString(), MediaType.APPLICATION_JSON).build();
             }
+
             AccessToken at = new AccessToken(oauthIssuerImpl.accessToken(), accountOfi);
             ObjectifyService.ofy().save().entity(at).now();
 
-            JSONObject result = new JSONObject();
             result.put("type", "AuthResponse");
             result.put("token" , at.getIdentifier());
             return Response.ok(result.toString(), MediaType.APPLICATION_JSON)
@@ -272,7 +264,7 @@ public class AccountService {
                                  @FormParam("username") String username,
                                  @FormParam("password") String password,
                                  @FormParam("originalPage") String originalPage,
-                                 @Context ServletContext servletContext)  throws Exception{
+                                 @Context ServletContext servletContext) throws Exception {
 
         OAuthIssuer oauthIssuerImpl = new OAuthIssuerImpl(new MD5Generator());
         try {
@@ -283,13 +275,13 @@ public class AccountService {
             }
 
             if (accountOfi == null) {
-                    URI location = new URI("../" + originalPage + "?incorrectUsername");
-                    throw new WebApplicationException(Response.temporaryRedirect(location).build());
+                URI location = new URI("../" + originalPage + "?incorrectUsername");
+                throw new WebApplicationException(Response.temporaryRedirect(location).build());
             }
 
             if (password == null || "".equals(password)|| !hash(password).equals(accountOfi.getPasswordHash())) {
-                    URI location = new URI("../" + originalPage + "?incorrectPassword");
-                    throw new WebApplicationException(Response.temporaryRedirect(location).build());
+                URI location = new URI("../" + originalPage + "?incorrectPassword");
+                throw new WebApplicationException(Response.temporaryRedirect(location).build());
             }
             AccessToken at = new AccessToken(oauthIssuerImpl.accessToken(), accountOfi);
             ObjectifyService.ofy().save().entity(at).now();
@@ -301,13 +293,11 @@ public class AccountService {
             CodeToAccount cta = new CodeToAccount(code, accountOfi);
             ObjectifyService.ofy().save().entity(cta).now();
 
-            URI location = new URI("http://streetlearn.appspot.com/oauth/wespot?code="+code);
+            URI location = new URI("http://streetlearn.appspot.com/oauth/wespot?code=" + code);
 
             throw new WebApplicationException(Response.temporaryRedirect(location).build());
-        } catch (OAuthSystemException e) {
+        } catch (OAuthSystemException|NullPointerException e) {
             e.printStackTrace();
-        } catch (NullPointerException npe) {
-            npe.printStackTrace();
         }
 
         return "<html></html>";
@@ -322,7 +312,7 @@ public class AccountService {
                                  @FormParam("username") String username,
                                  @FormParam("password") String password,
                                  @FormParam("originalPage") String originalPage,
-                                 @Context ServletContext servletContext)  throws Exception{
+                                 @Context ServletContext servletContext) throws Exception {
 
         if (username != null && !"".equals(username) && school != null && school != 0) {
             username = school + "_" + username;
@@ -334,16 +324,16 @@ public class AccountService {
     }
 
 
-    public static String hash(String pw){
-        try{
-        MessageDigest md = MessageDigest.getInstance("SHA-256");
-        byte[] mdbytes = md.digest(pw.getBytes());
-        StringBuffer sb = new StringBuffer();
-        for (int i = 0; i < mdbytes.length; i++) {
-            sb.append(Integer.toString((mdbytes[i] & 0xff) + 0x100, 16).substring(1));
-        }
+    public static String hash(String pw) {
+        try {
+            MessageDigest md = MessageDigest.getInstance("SHA-256");
+            byte[] mdbytes = md.digest(pw.getBytes());
+            StringBuffer sb = new StringBuffer();
+            for (int i = 0; i < mdbytes.length; i++) {
+                sb.append(Integer.toString((mdbytes[i] & 0xff) + 0x100, 16).substring(1));
+            }
 
-        return sb.toString();
+            return sb.toString();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -353,7 +343,6 @@ public class AccountService {
 
     public static AccountReset getAccountReset(String id) {
         return ObjectifyService.ofy().load().key(Key.create(AccountReset.class, id)).now();
-
     }
 
     public static void resetPassword(String resetId, String password) {

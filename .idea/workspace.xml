@@ -3,6 +3,7 @@
   <component name="ChangeListManager">
     <list default="true" id="4c649741-5432-4c5a-a25e-406f21db933e" name="Default" comment="">
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/net/wespot/oauth2/provider/AccountService.java" afterPath="$PROJECT_DIR$/src/net/wespot/oauth2/provider/AccountService.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/web/ResetPassword.jsp" afterPath="$PROJECT_DIR$/web/ResetPassword.jsp" />
     </list>
     <ignored path="$PROJECT_DIR$/out/" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -92,8 +93,8 @@
       <file leaf-file-name="AccountService.java" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/net/wespot/oauth2/provider/AccountService.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="102">
-              <caret line="332" column="0" lean-forward="false" selection-start-line="332" selection-start-column="0" selection-end-line="332" selection-end-column="0" />
+            <state relative-caret-position="150">
+              <caret line="298" column="34" lean-forward="true" selection-start-line="298" selection-start-column="34" selection-end-line="298" selection-end-column="34" />
               <folding />
             </state>
           </provider>
@@ -156,8 +157,8 @@
     <sorting>DEFINITION_ORDER</sorting>
   </component>
   <component name="ProjectFrameBounds">
-    <option name="x" value="17" />
-    <option name="y" value="40" />
+    <option name="x" value="36" />
+    <option name="y" value="23" />
     <option name="width" value="1260" />
     <option name="height" value="690" />
   </component>
@@ -462,16 +463,16 @@
       <option name="presentableId" value="Default" />
       <updated>1493633381739</updated>
       <workItem from="1493633388317" duration="13292000" />
-      <workItem from="1493670833659" duration="7750000" />
+      <workItem from="1493670833659" duration="10197000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="21042000" />
+    <option name="totallyTimeSpent" value="23489000" />
   </component>
   <component name="ToolWindowManager">
-    <frame x="17" y="40" width="1260" height="690" extended-state="0" />
-    <editor active="true" />
+    <frame x="36" y="23" width="1260" height="690" extended-state="0" />
+    <editor active="false" />
     <layout>
       <window_info id="Palette" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Nl-Palette" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
@@ -672,8 +673,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/net/wespot/oauth2/provider/AccountService.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="102">
-          <caret line="332" column="0" lean-forward="false" selection-start-line="332" selection-start-column="0" selection-end-line="332" selection-end-column="0" />
+        <state relative-caret-position="150">
+          <caret line="298" column="34" lean-forward="true" selection-start-line="298" selection-start-column="34" selection-end-line="298" selection-end-column="34" />
           <folding />
         </state>
       </provider>
