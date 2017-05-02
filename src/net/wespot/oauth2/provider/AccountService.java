@@ -1,6 +1,5 @@
 package net.wespot.oauth2.provider;
 
-import com.google.gwt.user.client.Window;
 import com.googlecode.objectify.Key;
 import com.googlecode.objectify.ObjectifyService;
 import net.wespot.db.AccessToken;
@@ -14,7 +13,6 @@ import org.apache.amber.oauth2.common.exception.OAuthSystemException;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 
-import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletContext;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
@@ -25,10 +23,8 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.NewCookie;
 import javax.ws.rs.core.Response;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.security.MessageDigest;
 import java.util.Date;
-import java.util.List;
 
 /**
  * ****************************************************************************
@@ -58,22 +54,7 @@ public class AccountService {
         ObjectifyService.register(CodeToAccount.class);
         ObjectifyService.register(AccessToken.class);
     }
-    @GET
-    @Consumes("application/x-www-form-urlencoded")
-    @Produces("application/json")
-    public String createAccount() {
-        Account account = new Account("someId2","iemand2") ;
-        account.setName("Stefaan weSPOT Ternier");
-        account.setGivenName("Stefaan");
-        account.setFamilyName("Ternier");
-        account.setPictureUrl("https://lh3.googleusercontent.com/-rRb8mSKLrNY/AAAAAAAAAAI/AAAAAAAAEQY/Y8BKx96IyHQ/photo.jpg");
 
-        ObjectifyService.ofy().save().entity(account).now();
-
-
-
-        return "{}";
-    }
     @GET
     @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
     @Path("/accountExists/{account}")
@@ -285,9 +266,6 @@ public class AccountService {
             }
             AccessToken at = new AccessToken(oauthIssuerImpl.accessToken(), accountOfi);
             ObjectifyService.ofy().save().entity(at).now();
-
-            String redirect_uri = "http://streetlearn.appspot.com/oauth/wespot";
-            String clientId = "wespotstreetlearnid";
 
             String code = oauthIssuerImpl.authorizationCode();
             CodeToAccount cta = new CodeToAccount(code, accountOfi);

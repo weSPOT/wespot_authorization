@@ -113,7 +113,7 @@ public class AuthEndpoint {
                         final Response.ResponseBuilder responseBuilder = Response.status(HttpServletResponse.SC_FOUND);
 
                         throw new WebApplicationException(
-                                responseBuilder.entity("client_id " + request.getParameter(OAuth.OAUTH_CLIENT_ID) + " is not a valid client id!!!").build());
+                                responseBuilder.entity("client_id " + request.getParameter(OAuth.OAUTH_CLIENT_ID) + " is not a valid client id!").build());
 
                     }
 
@@ -147,13 +147,10 @@ public class AuthEndpoint {
                             CodeToAccount cta = new CodeToAccount(code, accessToken.getAccount().getValue());
                             ObjectifyService.ofy().save().entity(cta).now();
                             System.out.println("code will be sent" + code);
-
                         }
                         if (responseType.equals(ResponseType.TOKEN.toString())) {
                             builder.setAccessToken(oauthIssuerImpl.accessToken());
-                            builder.setExpiresIn(3600l);
-
-
+                            builder.setExpiresIn("3600");
                         }
 
 
@@ -168,17 +165,17 @@ public class AuthEndpoint {
             }
             OAuthASResponse.OAuthAuthorizationResponseBuilder builder = OAuthASResponse
                     .authorizationResponse(request, HttpServletResponse.SC_FOUND);
-//            final OAuthResponse response = builder.location("../Login.html?"+OAuth.OAUTH_CLIENT_ID+"="+request.getParameter(OAuth.OAUTH_CLIENT_ID)+"&"+OAuth.OAUTH_SCOPE+"="+request.getParameter(OAuth.OAUTH_SCOPE)).buildQueryMessage();
             final OAuthResponse response = builder.location("../Login.html")
                     .setParam(OAuth.OAUTH_REDIRECT_URI, request.getParameter(OAuth.OAUTH_REDIRECT_URI))
                     .setParam(OAuth.OAUTH_CLIENT_ID, request.getParameter(OAuth.OAUTH_CLIENT_ID))
                     .setParam(OAuth.OAUTH_RESPONSE_TYPE, request.getParameter(OAuth.OAUTH_RESPONSE_TYPE))
-                    .setParam(OAuth.OAUTH_SCOPE, request.getParameter(OAuth.OAUTH_SCOPE)).buildQueryMessage();
+                    .setParam(OAuth.OAUTH_SCOPE, request.getParameter(OAuth.OAUTH_SCOPE))
+                    .buildQueryMessage();
             URI url = new URI(response.getLocationUri());
             System.out.println("redirecting to login page" + url);
             return Response.status(response.getResponseStatus()).location(url).build();
 
-            //todo check if redirectURI exists.
+            //TODO: check if redirectURI exists.
 
 
         } catch (OAuthProblemException e) {
