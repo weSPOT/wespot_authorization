@@ -2,8 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="4c649741-5432-4c5a-a25e-406f21db933e" name="Default" comment="">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/net/wespot/oauth2/provider/EmailValidator.java" afterPath="$PROJECT_DIR$/src/net/wespot/oauth2/provider/EmailValidator.java" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/net/wespot/oauth2/provider/EmailValidator.java" afterPath="" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/web/Account.jsp" afterPath="$PROJECT_DIR$/web/Account.jsp" />
     </list>
     <ignored path="$PROJECT_DIR$/out/" />
@@ -464,12 +463,12 @@
       <option name="presentableId" value="Default" />
       <updated>1493633381739</updated>
       <workItem from="1493633388317" duration="13292000" />
-      <workItem from="1493670833659" duration="5604000" />
+      <workItem from="1493670833659" duration="6196000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="18896000" />
+    <option name="totallyTimeSpent" value="19488000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="17" y="40" width="1260" height="690" extended-state="0" />
