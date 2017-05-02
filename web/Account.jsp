@@ -17,52 +17,42 @@
 <figure id="background"></figure>
 
 <%
-    List<String> fields = new ArrayList<String>();
-    fields.add("username");
-    fields.add("firstname");
-    fields.add("lastname");
-    fields.add("email");
-    fields.add("password");
-    fields.add("passwordagain");
-    HashMap<String, String> requestFields = new HashMap<String, String>();
-    for (int i = 0; i < fields.size(); i++) {
-      requestFields.put(fields.get(i), request.getParameter(fields.get(i)));
-    }
+    String username = request.getParameter("username");
+    String firstname = request.getParameter("firstname");
+    String lastname = request.getParameter("lastname");
+    String email = request.getParameter("email");
+    String password = request.getParameter("password");
+    String passwordagain = request.getParameter("passwordagain");
+
     List<String> incorrectFields = new ArrayList<String>();
-    for (int i = 0; i < fields.size(); i++) {
-      String currentField = requestFields.get(fields.get(i));
-      if (currentField != null && "".equals(currentField.trim())) {
-        incorrectFields.add(fields.get(i));
-      }
-    }
-    // Fields that need custom verification
-    String username = requestFields.get("username");
+
+    if (username != null && "".equals(username)) incorrectFields.add("username");
+    if (firstname != null && "".equals(firstname)) incorrectFields.add("firstname");
+    if (lastname != null && "".equals(lastname)) incorrectFields.add("lastname");
+    if (email != null && "".equals(email)) incorrectFields.add("email");
+    if (password != null && "".equals(password)) incorrectFields.add("password");
+    if (passwordagain != null && "".equals(passwordagain)) incorrectFields.add("passwordagain");
+
     boolean nameExists = false;
     if (username != null && !"".equals(username) && new AccountService().accountExists(username).contains("true")) {
         nameExists = true;
     }
 
-    String email = requestFields.get("email");
     if (email != null) {
         if (!new EmailValidator().validate(email) && !incorrectFields.contains("email")) {
             incorrectFields.add("email");
         }
     }
 
-    String password = requestFields.get("password");
-    String passwordagain = requestFields.get("passwordagain");
     boolean passwordsDoNotMatch = false;
     if (password != null && passwordagain != null) {
         passwordsDoNotMatch = !password.equals(passwordagain);
     }
 
-    String firstname = requestFields.get("firstname");
-    String lastname = requestFields.get("lastname");
-
     // Also show form when there was no input (when all the fields were null)
     boolean showForm = false;
     if (username == null && email == null && password == null && passwordagain == null && firstname == null && lastname == null) {
-      showForm = true;
+        showForm = true;
     }
 
     if (incorrectFields.size() > 0 || passwordsDoNotMatch || nameExists || showForm) {

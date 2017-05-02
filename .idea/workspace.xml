@@ -3,8 +3,8 @@
   <component name="ChangeListManager">
     <list default="true" id="4c649741-5432-4c5a-a25e-406f21db933e" name="Default" comment="">
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/net/wespot/oauth2/provider/MailDelegator.java" afterPath="$PROJECT_DIR$/src/net/wespot/oauth2/provider/MailDelegator.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/net/wespot/oauth2/provider/ResourceQueryEndpoint.java" afterPath="$PROJECT_DIR$/src/net/wespot/oauth2/provider/ResourceQueryEndpoint.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/net/wespot/oauth2/provider/EmailValidator.java" afterPath="$PROJECT_DIR$/src/net/wespot/oauth2/provider/EmailValidator.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/web/Account.jsp" afterPath="$PROJECT_DIR$/web/Account.jsp" />
     </list>
     <ignored path="$PROJECT_DIR$/out/" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -62,8 +62,8 @@
       <file leaf-file-name="ResourceQueryEndpoint.java" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/net/wespot/oauth2/provider/ResourceQueryEndpoint.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="275">
-              <caret line="80" column="0" lean-forward="true" selection-start-line="80" selection-start-column="0" selection-end-line="80" selection-end-column="0" />
+            <state relative-caret-position="110">
+              <caret line="69" column="0" lean-forward="true" selection-start-line="69" selection-start-column="0" selection-end-line="69" selection-end-column="0" />
               <folding>
                 <element signature="imports" expanded="true" />
               </folding>
@@ -464,12 +464,12 @@
       <option name="presentableId" value="Default" />
       <updated>1493633381739</updated>
       <workItem from="1493633388317" duration="13292000" />
-      <workItem from="1493670833659" duration="2246000" />
+      <workItem from="1493670833659" duration="5604000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="15538000" />
+    <option name="totallyTimeSpent" value="18896000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="17" y="40" width="1260" height="690" extended-state="0" />
@@ -672,8 +672,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/net/wespot/oauth2/provider/ResourceQueryEndpoint.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="275">
-          <caret line="80" column="0" lean-forward="true" selection-start-line="80" selection-start-column="0" selection-end-line="80" selection-end-column="0" />
+        <state relative-caret-position="110">
+          <caret line="69" column="0" lean-forward="true" selection-start-line="69" selection-start-column="0" selection-end-line="69" selection-end-column="0" />
           <folding>
             <element signature="imports" expanded="true" />
           </folding>
