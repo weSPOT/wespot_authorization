@@ -1,7 +1,6 @@
 package net.wespot.oauth2.provider;
 
 import com.googlecode.objectify.ObjectifyService;
-import net.wespot.db.Account;
 import net.wespot.db.ApplicationRegistry;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
@@ -35,32 +34,17 @@ public class ApplicationRegistryService {
         ObjectifyService.register(ApplicationRegistry.class);
     }
 
-    @GET
-    @Produces("application/json")
-    public String createApp() {
-        ApplicationRegistry app = new ApplicationRegistry() ;
-        app.setRedirectUri("http://localhost:8888/oauth/wespot");
-        app.setClientSecret("wespotClientSecret");
-        app.setClientId("wespotClientId");
-        app.setApplicationName("ARLearn");
-
-        ObjectifyService.ofy().save().entity(app).now();
-
-        return "";
-    }
-
     @POST
     @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
     @Path("/createApplication")
-    public String createAccount(@DefaultValue("application/json") @HeaderParam("Content-Type") String contentType,
-                                @DefaultValue("application/json") @HeaderParam("Accept") String accept,
-                                String application) {
-
+    public String createApplication(@DefaultValue("application/json") @HeaderParam("Content-Type") String contentType,
+                                    @DefaultValue("application/json") @HeaderParam("Accept") String accept,
+                                    String application) {
 
         try {
             JSONObject applicationJson = new JSONObject(application);
 
-            ApplicationRegistry app = new ApplicationRegistry() ;
+            ApplicationRegistry app = new ApplicationRegistry();
             app.setRedirectUri(applicationJson.getString("redirectUri"));
             app.setClientSecret(applicationJson.getString("sharedSecret"));
             app.setClientId(applicationJson.getString("clientId"));
@@ -68,7 +52,6 @@ public class ApplicationRegistryService {
             app.setApplicationName(applicationJson.getString("appName"));
 
             ObjectifyService.ofy().save().entity(app).now();
-
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -76,6 +59,4 @@ public class ApplicationRegistryService {
 
         return "{}";
     }
-
-
 }

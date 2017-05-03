@@ -30,6 +30,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+import net.wespot.utils.Utils;
+
 /**
  * ****************************************************************************
  * Copyright (C) 2013 Open Universiteit Nederland
@@ -62,50 +64,34 @@ public class TokenEndpoint {
     @POST
     @Consumes("application/x-www-form-urlencoded")
     @Produces("application/json")
-    public Response authorize(@Context javax.servlet.http.HttpServletRequest request) throws OAuthSystemException {
-        System.out.println("before fetching ");
+    public Response authorize(@Context HttpServletRequest request) throws OAuthSystemException {
         HashMap<String, String> hashMap = new HashMap<String, String>();
-        OAuthTokenRequest oauthRequest = null;
-        try {
-            System.out.println("before fetching ");
 
-            oauthRequest = new OAuthTokenRequest(request);
-            System.out.println("before fetching "+oauthRequest.getParam(OAuth.OAUTH_CLIENT_ID));
-            hashMap.put(OAuth.OAUTH_CLIENT_ID, oauthRequest.getParam(OAuth.OAUTH_CLIENT_ID));
-            hashMap.put(OAuth.OAUTH_CODE, oauthRequest.getParam(OAuth.OAUTH_CODE));
-            hashMap.put(OAuth.OAUTH_GRANT_TYPE, oauthRequest.getParam(OAuth.OAUTH_GRANT_TYPE));
-            hashMap.put(OAuth.OAUTH_CLIENT_SECRET, oauthRequest.getParam(OAuth.OAUTH_CLIENT_SECRET));
-            System.out.println("hashmap "+hashMap.toString());
-            System.out.println("OAUTH_CLIENT_ID "+oauthRequest.getParam(OAuth.OAUTH_CLIENT_ID));
-        } catch (OAuthProblemException e) {
-            OAuthResponse res = OAuthASResponse.errorResponse(HttpServletResponse.SC_BAD_REQUEST).error(e)
-                    .buildJSONMessage();
-            return Response.status(res.getResponseStatus()).entity(res.getBody()).build();
+        String clientId = request.getParameter(OAuth.OAUTH_CLIENT_ID);
+        String clientSecret = request.getParameter(OAuth.OAUTH_CLIENT_SECRET);
+        String code = request.getParameter(OAuth.OAUTH_CODE);
+        String grantType = request.getParameter(OAuth.OAUTH_GRANT_TYPE);
+
+        if (Utils.isEmpty(clientId) || Utils.isEmpty(clientSecret) || Utils.isEmpty(code) || Utils.isEmpty(grantType)) {
+            return Response.status(Response.Status.BAD_REQUEST).entity("Missing field!").build();
         }
 
-        return authorize(hashMap);
+        hashMap.put(OAuth.OAUTH_CLIENT_ID, clientId);
+        hashMap.put(OAuth.OAUTH_CLIENT_SECRET, clientSecret);
+        hashMap.put(OAuth.OAUTH_CODE, code);
+        hashMap.put(OAuth.OAUTH_GRANT_TYPE, grantType);
 
+        return authorize(hashMap);
     }
 
     @GET
     @Consumes("application/x-www-form-urlencoded")
     @Produces("application/json")
-    public Response authorizeGet(@Context javax.servlet.http.HttpServletRequest request) throws OAuthSystemException {
-        HashMap<String, String> hashMap = new HashMap<String, String>();
-        hashMap.put(OAuth.OAUTH_CLIENT_ID, request.getParameter(OAuth.OAUTH_CLIENT_ID));
-        hashMap.put(OAuth.OAUTH_CODE, request.getParameter(OAuth.OAUTH_CODE));
-        hashMap.put(OAuth.OAUTH_GRANT_TYPE, request.getParameter(OAuth.OAUTH_GRANT_TYPE));
-        hashMap.put(OAuth.OAUTH_CLIENT_SECRET, request.getParameter(OAuth.OAUTH_CLIENT_SECRET));
-
-        Set<Map.Entry> set = request.getParameterMap().entrySet();
-        for (Map.Entry entry : set) {
-            System.out.println("entry " + entry.getKey() + " " + entry.getValue());
-        }
-        return authorize( hashMap);
+    public Response authorizeGet(@Context HttpServletRequest request) throws OAuthSystemException {
+        return authorize(request);
     }
 
-
-    private Response authorize(HashMap<String, String> hashMap)  throws OAuthSystemException{
+    private Response authorize(HashMap<String, String> hashMap) throws OAuthSystemException {
         String clientId = hashMap.get(OAuth.OAUTH_CLIENT_ID);
         String sharedSecret = "";
         if (clientId != null) {
@@ -115,7 +101,7 @@ public class TokenEndpoint {
                 final Response.ResponseBuilder responseBuilder = Response.status(HttpServletResponse.SC_FOUND);
 
                 throw new WebApplicationException(
-                        responseBuilder.entity("client_id " + hashMap.get(OAuth.OAUTH_CLIENT_ID) + " is not a valid client id!!!").build());
+                        responseBuilder.entity("client_id " + hashMap.get(OAuth.OAUTH_CLIENT_ID) + " is not a valid client id!").build());
 
             } else {
                 sharedSecret = application.getClientSecret();
