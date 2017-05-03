@@ -93,46 +93,24 @@ public class TokenEndpoint {
 
     private Response authorize(HashMap<String, String> hashMap) throws OAuthSystemException {
         String clientId = hashMap.get(OAuth.OAUTH_CLIENT_ID);
-        String sharedSecret = "";
-        if (clientId != null) {
 
-            ApplicationRegistry application = ObjectifyService.ofy().load().key(Key.create(ApplicationRegistry.class, hashMap.get(OAuth.OAUTH_CLIENT_ID))).now();
-            if (application == null) {
-                final Response.ResponseBuilder responseBuilder = Response.status(HttpServletResponse.SC_FOUND);
-
-                throw new WebApplicationException(
-                        responseBuilder.entity("client_id " + hashMap.get(OAuth.OAUTH_CLIENT_ID) + " is not a valid client id!").build());
-
-            } else {
-                sharedSecret = application.getClientSecret();
-            }
-
-        } else {
-            final Response.ResponseBuilder responseBuilder = Response.status(HttpServletResponse.SC_FOUND);
-
-            throw new WebApplicationException(
-                    responseBuilder.entity("OAuth client id needs to be provided by client!!!").build());
+        ApplicationRegistry application = ObjectifyService.ofy().load().key(Key.create(ApplicationRegistry.class, clientId)).now();
+        if (application == null) {
+            return Response
+                    .status(Response.Status.BAD_REQUEST)
+                    .entity("client_id " + clientId + " is not a valid client id!")
+                    .build();
         }
 
-//        if (!clientId.equals(hashMap.get(OAuth.OAUTH_CLIENT_ID))) {
-//            OAuthResponse response =
-//                    OAuthASResponse.errorResponse(HttpServletResponse.SC_BAD_REQUEST)
-//                            .setError(OAuthError.TokenResponse.INVALID_CLIENT).setErrorDescription("client_id not found")
-//                            .buildJSONMessage();
-//            return Response.status(response.getResponseStatus()).entity(response.getBody()).build();
-//        }
-
-        if (!sharedSecret.equals(hashMap.get(OAuth.OAUTH_CLIENT_SECRET))) {
-            OAuthResponse response =
-                    OAuthASResponse.errorResponse(HttpServletResponse.SC_BAD_REQUEST)
-                            .setError(OAuthError.TokenResponse.INVALID_REQUEST).setErrorDescription("shared secret does not match")
-                            .buildJSONMessage();
-            return Response.status(response.getResponseStatus()).entity(response.getBody()).build();
+        if (!application.getClientSecret().equals(hashMap.get(OAuth.OAUTH_CLIENT_SECRET))) {
+            return Response
+                    .status(Response.Status.BAD_REQUEST)
+                    .entity("client_secret does not match client_id")
+                    .build();
         }
 
+        String accessToken = new MD5Generator().generateValue();
 
-        OAuthIssuer oauthIssuerImpl = new OAuthIssuerImpl(new MD5Generator());
-        String accessToken = oauthIssuerImpl.accessToken();
         System.out.println("access token is " + accessToken);
         OAuthResponse response = OAuthASResponse
                 .tokenResponse(HttpServletResponse.SC_OK)
@@ -143,13 +121,13 @@ public class TokenEndpoint {
         CodeToAccount code = ObjectifyService.ofy().load().key(Key.create(CodeToAccount.class, hashMap.get(OAuth.OAUTH_CODE))).now();
         if (code != null) {
             Account account = null;
+            System.out.println(code.getAccount().isLoaded());
             if (!code.getAccount().isLoaded()) {
                 account = ObjectifyService.ofy().load().key(code.getAccount().getKey()).now();
             }
             AccessToken at = new AccessToken(accessToken, account);
             ObjectifyService.ofy().save().entity(at).now();
         }
-
 
         return Response.status(response.getResponseStatus()).entity(response.getBody()).build();
     }
