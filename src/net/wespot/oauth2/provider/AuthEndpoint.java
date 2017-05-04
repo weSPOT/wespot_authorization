@@ -30,6 +30,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 
 import net.wespot.utils.Utils;
+import net.wespot.utils.DbUtils;
 
 /**
  * ****************************************************************************
@@ -86,7 +87,7 @@ public class AuthEndpoint {
 
             if (token == null) return invalidCookieResponse;
 
-            AccessToken accessToken = ObjectifyService.ofy().load().key(Key.create(AccessToken.class, token)).now();
+            AccessToken accessToken = DbUtils.getAccessToken(token);
             if (!accessToken.getAccount().isLoaded()) {
                 ObjectifyService.ofy().load().key(accessToken.getAccount().getKey()).now();
             }
@@ -97,7 +98,7 @@ public class AuthEndpoint {
             String clientId = request.getParameter(OAuth.OAUTH_CLIENT_ID);
 
             if (clientId != null) {
-                ApplicationRegistry application = ObjectifyService.ofy().load().key(Key.create(ApplicationRegistry.class, clientId)).now();
+                ApplicationRegistry application = DbUtils.getApplication(clientId);
                 if (application == null) {
                     return Response
                             .status(Response.Status.BAD_REQUEST)

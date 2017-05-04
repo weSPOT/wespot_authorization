@@ -31,6 +31,7 @@ import java.util.Map;
 import java.util.Set;
 
 import net.wespot.utils.Utils;
+import net.wespot.utils.DbUtils;
 
 /**
  * ****************************************************************************
@@ -94,7 +95,7 @@ public class TokenEndpoint {
     private Response authorize(HashMap<String, String> hashMap) throws OAuthSystemException {
         String clientId = hashMap.get(OAuth.OAUTH_CLIENT_ID);
 
-        ApplicationRegistry application = ObjectifyService.ofy().load().key(Key.create(ApplicationRegistry.class, clientId)).now();
+        ApplicationRegistry application = DbUtils.getApplication(clientId);
         if (application == null) {
             return Response
                     .status(Response.Status.BAD_REQUEST)
@@ -118,7 +119,7 @@ public class TokenEndpoint {
                 .setExpiresIn("3600")
                 .buildJSONMessage();
 
-        CodeToAccount code = ObjectifyService.ofy().load().key(Key.create(CodeToAccount.class, hashMap.get(OAuth.OAUTH_CODE))).now();
+        CodeToAccount code = DbUtils.getCodeToAccount(hashMap.get(OAuth.OAUTH_CODE));
         if (code != null) {
             Account account = null;
             if (!code.getAccount().isLoaded()) {

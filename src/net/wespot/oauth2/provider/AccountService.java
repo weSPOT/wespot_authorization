@@ -27,6 +27,7 @@ import java.security.MessageDigest;
 import java.util.Date;
 
 import net.wespot.utils.Utils;
+import net.wespot.utils.DbUtils;
 
 /**
  * ****************************************************************************
@@ -63,8 +64,8 @@ public class AccountService {
     public String accountExists(@PathParam("username") String username) {
         try {
             JSONObject result = new JSONObject();
-            Account accountOfi = AccountService.getAccount(username);
-            result.put("accountExists", accountOfi != null);
+            Account account = DbUtils.getAccount(username);
+            result.put("accountExists", account != null);
             return result.toString();
         } catch (JSONException e) {
             e.printStackTrace();
@@ -104,13 +105,6 @@ public class AccountService {
 
         ObjectifyService.ofy().save().entity(accountOfi);
         return accountOfi;
-    }
-
-    public static Account getAccount(String username) {
-        if (!Utils.isEmpty(username)) {
-            return ObjectifyService.ofy().load().key(Key.create(Account.class, username)).now();
-        }
-        return null;
     }
 
     public static AccountReset resetAccount(Account accountOfi) {
@@ -162,12 +156,11 @@ public class AccountService {
                                  String account) {
 
         try {
-            String accessToken = new MD5Generator().generateValue();
             JSONObject result = new JSONObject();
             result.put("type", "AuthResponse");
 
             JSONObject accountJson = new JSONObject(account);
-            Account accountOfi = AccountService.getAccount(accountJson.getString("username"));
+            Account accountOfi = DbUtils.getAccount(accountJson.getString("username"));
             if (accountOfi == null) {
                 result.put("error", "username does not exist ");
                 result.put("userName", false);
@@ -182,6 +175,7 @@ public class AccountService {
                 return Response.ok(result.toString(), MediaType.APPLICATION_JSON).build();
             }
 
+            String accessToken = new MD5Generator().generateValue();
             AccessToken at = new AccessToken(accessToken, accountOfi);
             ObjectifyService.ofy().save().entity(at).now();
 
@@ -210,7 +204,7 @@ public class AccountService {
                                  @Context ServletContext servletContext) throws Exception {
 
         try {
-            Account accountOfi = AccountService.getAccount(username);
+            Account accountOfi = DbUtils.getAccount(username);
 
             if (accountOfi == null) {
                 URI location = new URI("../" + originalPage + "?incorrectUsername");
@@ -276,14 +270,9 @@ public class AccountService {
         return "";
     }
 
-
-    public static AccountReset getAccountReset(String id) {
-        return ObjectifyService.ofy().load().key(Key.create(AccountReset.class, id)).now();
-    }
-
     public static void resetPassword(String resetId, String password) {
-        AccountReset ar = getAccountReset(resetId);
-        Account account = ObjectifyService.ofy().load().key(Key.create(Account.class, ar.getIdentifier())).now();
+        AccountReset ar = DbUtils.getAccountReset(resetId);
+        Account account = DbUtils.getAccount(ar.getIdentifier());
         account.setPasswordHash(hash(password));
         ObjectifyService.ofy().save().entity(account);
         ObjectifyService.ofy().delete().entity(ar);

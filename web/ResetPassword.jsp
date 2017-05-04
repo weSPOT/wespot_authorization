@@ -3,6 +3,7 @@
 <%@ page import="sun.tools.jar.resources.jar" %>
 <%@ page import="net.wespot.oauth2.provider.MailDelegator" %>
 <%@ page import="net.wespot.db.Account" %>
+<%@ page import="net.wespot.utils.DbUtils" %>
 <!DOCTYPE html>
 <html>
 <head lang="en">
@@ -22,7 +23,7 @@
     String username = request.getParameter("username");
     if (resetId == null && username != null) {
         if (!school.equals("0")) username = school + "_" + username;
-        Account account = AccountService.getAccount(username);
+        Account account = DbUtils.getAccount(username);
         if (account == null) {
             response.sendRedirect("ResetPassword.html");
         } else {
@@ -44,7 +45,7 @@
 </section>
 <%
     } else if (resetId != null) {
-        AccountReset ar = AccountService.getAccountReset(resetId);
+        AccountReset ar = DbUtils.getAccountReset(resetId);
         if (ar != null) {
         %>
 <section id="content" data-role="content">

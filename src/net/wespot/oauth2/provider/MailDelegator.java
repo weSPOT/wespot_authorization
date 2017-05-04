@@ -35,14 +35,10 @@ import java.util.logging.Logger;
  * ****************************************************************************
  */
 public class MailDelegator {
-
-    private static final Logger logger = Logger.getLogger(MailDelegator.class.getName());
-
     public void changePassword(String toMail, String resetId) {
         String from = "no-reply@" + SystemProperty.applicationId.get() + ".appspotmail.com";
 
-        Properties props = new Properties();
-        Session session = Session.getDefaultInstance(props, null);
+        Session session = Session.getDefaultInstance(new Properties(), null);
         String link = "http://" + SystemProperty.applicationId.get() + ".appspot.com/ResetPassword.jsp?resetId=" + resetId;
 
         String msgBody = "<html><body>";
@@ -81,7 +77,7 @@ public class MailDelegator {
             msg.setContent(mp);
             Transport.send(msg);
         } catch (Exception e) {
-            logger.log(Level.SEVERE, e.getMessage(), e);
+            System.out.println(e.getMessage());
         }
     }
 }
