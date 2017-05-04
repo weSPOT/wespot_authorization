@@ -4,6 +4,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
+import javax.ws.rs.core.Response.ResponseBuilder;
 
 import com.googlecode.objectify.ObjectifyService;
 import net.wespot.db.AccessToken;
@@ -42,30 +44,12 @@ import net.wespot.utils.DbUtils;
  * ****************************************************************************
  */
 @Path("/token")
-public class TokenEndpoint {
+public class TokenEndpoint implements Endpoint {
     static {
         ObjectifyService.register(AccessToken.class);
         ObjectifyService.register(CodeToAccount.class);
         ObjectifyService.register(ApplicationRegistry.class);
         ObjectifyService.register(Account.class);
-    }
-
-    @POST
-    @Consumes("application/x-www-form-urlencoded")
-    @Produces("application/json")
-    public Response authorize(@Context HttpServletRequest request) throws OAuthSystemException, JSONException {
-        HashMap<String, String> requestData = new HashMap<String, String>();
-
-        requestData.put(OAuth.OAUTH_CLIENT_ID, request.getParameter(OAuth.OAUTH_CLIENT_ID));
-        requestData.put(OAuth.OAUTH_CLIENT_SECRET, request.getParameter(OAuth.OAUTH_CLIENT_SECRET));
-        requestData.put(OAuth.OAUTH_CODE, request.getParameter(OAuth.OAUTH_CODE));
-        requestData.put(OAuth.OAUTH_GRANT_TYPE, request.getParameter(OAuth.OAUTH_GRANT_TYPE));
-
-        if (Utils.hasEmpty(requestData.keySet())) {
-            return Response.status(Response.Status.BAD_REQUEST).entity("Missing field!").build();
-        }
-
-        return authorize(requestData);
     }
 
     @GET
@@ -75,34 +59,39 @@ public class TokenEndpoint {
         return authorize(request);
     }
 
-    private Response authorize(HashMap<String, String> hashMap) throws OAuthSystemException, JSONException {
-        String clientId = hashMap.get(OAuth.OAUTH_CLIENT_ID);
+    @POST
+    @Consumes("application/x-www-form-urlencoded")
+    @Produces("application/json")
+    public Response authorize(@Context HttpServletRequest request) throws OAuthSystemException, JSONException {
+        String clientId = request.getParameter(OAuth.OAUTH_CLIENT_ID);
+        String clientSecret = request.getParameter(OAuth.OAUTH_CLIENT_SECRET);
+        String code = request.getParameter(OAuth.OAUTH_CODE);
+        String grantType = request.getParameter(OAuth.OAUTH_GRANT_TYPE);
+
+        final ResponseBuilder badRequest = Response.status(Status.BAD_REQUEST);
+
+        if (Utils.isEmpty(clientId) || Utils.isEmpty(clientSecret) || Utils.isEmpty(code) || Utils.isEmpty(grantType)) {
+            return badRequest.entity("Missing field!").build();
+        }
 
         ApplicationRegistry application = DbUtils.getApplication(clientId);
         if (application == null) {
-            return Response
-                    .status(Response.Status.BAD_REQUEST)
-                    .entity("client_id " + clientId + " is not a valid client id!")
-                    .build();
+            return badRequest.entity("client_id " + clientId + " is not a valid client id!").build();
         }
 
-        if (!application.getClientSecret().equals(hashMap.get(OAuth.OAUTH_CLIENT_SECRET))) {
-            return Response
-                    .status(Response.Status.BAD_REQUEST)
-                    .entity("client_secret does not match client_id")
-                    .build();
+        if (!application.getClientSecret().equals(clientSecret)) {
+            return badRequest.entity("client_secret does not match client_id").build();
+        }
+
+        CodeToAccount accountCode = DbUtils.getCodeToAccount(code);
+        Account account = null;
+        if (!accountCode.getAccount().isLoaded()) {
+            account = ObjectifyService.ofy().load().key(accountCode.getAccount().getKey()).now();
         }
 
         String accessToken = new MD5Generator().generateValue();
-        CodeToAccount code = DbUtils.getCodeToAccount(hashMap.get(OAuth.OAUTH_CODE));
-        if (code != null) {
-            Account account = null;
-            if (!code.getAccount().isLoaded()) {
-                account = ObjectifyService.ofy().load().key(code.getAccount().getKey()).now();
-            }
-            AccessToken at = new AccessToken(accessToken, account);
-            ObjectifyService.ofy().save().entity(at).now();
-        }
+        AccessToken at = new AccessToken(accessToken, account);
+        ObjectifyService.ofy().save().entity(at).now();
 
         JSONObject result = new JSONObject()
                 .put("access_token", accessToken)

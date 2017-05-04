@@ -5,6 +5,8 @@ import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
+import javax.ws.rs.core.Response.ResponseBuilder;
 
 import com.googlecode.objectify.ObjectifyService;
 import net.wespot.db.AccessToken;
@@ -48,7 +50,7 @@ import net.wespot.utils.DbUtils;
  * ****************************************************************************
  */
 @Path("/auth")
-public class AuthEndpoint {
+public class AuthEndpoint implements Endpoint {
 
     static {
         ObjectifyService.register(AccessToken.class);
@@ -57,13 +59,13 @@ public class AuthEndpoint {
         ObjectifyService.register(ApplicationRegistry.class);
     }
 
-    @POST
-    public Response authorizePOST(@Context HttpServletRequest request)
+    @GET
+    public Response authorizeGet(@Context HttpServletRequest request)
             throws URISyntaxException, OAuthSystemException {
         return authorize(request);
     }
 
-    @GET
+    @POST
     public Response authorize(@Context HttpServletRequest request)
             throws URISyntaxException, OAuthSystemException {
         try {
@@ -92,19 +94,14 @@ public class AuthEndpoint {
 
             String clientId = request.getParameter(OAuth.OAUTH_CLIENT_ID);
 
+            ResponseBuilder badRequest = Response.status(Status.BAD_REQUEST);
             if (clientId != null) {
                 ApplicationRegistry application = DbUtils.getApplication(clientId);
                 if (application == null) {
-                    return Response
-                            .status(Response.Status.BAD_REQUEST)
-                            .entity("client_id " + clientId + " is not a valid client id!")
-                            .build();
+                    return badRequest.entity("client_id " + clientId + " is not a valid client id!").build();
                 }
             } else {
-                return Response
-                        .status(Response.Status.BAD_REQUEST)
-                        .entity("OAuth client id needs to be provided by client!")
-                        .build();
+                return badRequest.entity("OAuth client id needs to be provided by client!").build();
             }
 
             OAuthAuthzRequest oauthRequest = new OAuthAuthzRequest(request);
@@ -134,11 +131,8 @@ public class AuthEndpoint {
             URI url = new URI(response.getLocationUri());
 
             return Response.status(response.getResponseStatus()).location(url).build();
-
-            //TODO: check if redirectURI exists.
-
         } catch (OAuthProblemException e) {
-            final Response.ResponseBuilder responseBuilder = Response.status(HttpServletResponse.SC_FOUND);
+            final ResponseBuilder responseBuilder = Response.status(HttpServletResponse.SC_FOUND);
 
             String redirectUri = e.getRedirectUri();
 

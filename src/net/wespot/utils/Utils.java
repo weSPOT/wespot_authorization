@@ -8,14 +8,6 @@ public final class Utils {
         return value == null || "".equals(value.trim());
     }
 
-    public static boolean hasEmpty(Set<String> set) {
-        boolean hasEmpty = false;
-        for (String key : set) {
-            if (!hasEmpty) hasEmpty = Utils.isEmpty(key);
-        }
-        return hasEmpty;
-    }
-
     public static String getTokenFromCookies(Cookie[] cookies) {
         if (cookies == null) return null;
         String token = null;

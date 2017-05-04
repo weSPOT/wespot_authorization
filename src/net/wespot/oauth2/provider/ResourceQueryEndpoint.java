@@ -14,6 +14,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 
 import net.wespot.utils.DbUtils;
 
@@ -57,7 +58,7 @@ public class ResourceQueryEndpoint {
             Account account = ObjectifyService.ofy().load().ref(at.getAccount()).now();
             return Response.ok(account.toJson()).build();
         } catch (OAuthProblemException|NullPointerException e) {
-            return Response.status(Response.Status.BAD_REQUEST).entity("Invalid access token").build();
+            return Response.status(Status.BAD_REQUEST).entity("Invalid access token").build();
         }
     }
 
