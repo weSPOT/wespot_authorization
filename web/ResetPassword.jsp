@@ -20,10 +20,9 @@
     String password = request.getParameter("password");
     String school = request.getParameter("school");
     String username = request.getParameter("username");
-    String email = request.getParameter("email");
-    if (resetId == null && (username != null || email != null)) {
+    if (resetId == null && username != null) {
         if (!school.equals("0")) username = school + "_" + username;
-        Account account = AccountService.resetAccountGetAccount(username);
+        Account account = AccountService.getAccount(username);
         if (account == null) {
             response.sendRedirect("ResetPassword.html");
         } else {

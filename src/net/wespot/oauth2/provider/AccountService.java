@@ -59,13 +59,13 @@ public class AccountService {
 
     @GET
     @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
-    @Path("/accountExists/{account}")
-    public String accountExists(@PathParam("account") String account) {
+    @Path("/accountExists/{username}")
+    public String accountExists(@PathParam("username") String username) {
         try {
             JSONObject result = new JSONObject();
-            Account accountOfi = ObjectifyService.ofy().load().key(Key.create(Account.class, account)).now();
-            result.put("accountExists", accountOfi!= null);
-            return result.toString() ;
+            Account accountOfi = AccountService.getAccount(username);
+            result.put("accountExists", accountOfi != null);
+            return result.toString();
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -79,32 +79,22 @@ public class AccountService {
                                 @DefaultValue("application/json") @HeaderParam("Accept") String accept,
                                 String account) {
 
-        ObjectifyService.register(Account.class);
-
         try {
             JSONObject accountJson = new JSONObject(account);
-            Account accountOfi = new Account(accountJson.getString("username"),accountJson.getString("username")) ;
-            accountOfi.setPasswordHash(hash(accountJson.getString("password")));
 
-            accountOfi.setName(accountJson.getString("firstname")+" "+accountJson.getString("familyName"));
-            accountOfi.setFamilyName(accountJson.getString("familyName"));
-            accountOfi.setGivenName(accountJson.getString("firstname"));
-            if (accountJson.has("pictureUrl")) accountOfi.setPictureUrl(accountJson.getString("pictureUrl"));
-            accountOfi.setEmail(accountJson.getString("email"));
-
-
-            ObjectifyService.ofy().save().entity(accountOfi);
+            createAccountStatic(accountJson.getString("username"),
+                    accountJson.getString("password"),
+                    accountJson.getString("firstName"),
+                    accountJson.getString("lastName"),
+                    accountJson.getString("email"));
         } catch (JSONException e) {
             e.printStackTrace();
         }
-
 
         return "{}";
     }
 
     public static Account createAccountStatic(String username, String password, String firstName, String lastName, String email) {
-        ObjectifyService.register(Account.class);
-
         Account accountOfi = new Account(username, username);
         accountOfi.setPasswordHash(hash(password));
         accountOfi.setName(firstName + " " + lastName);
@@ -116,38 +106,18 @@ public class AccountService {
         return accountOfi;
     }
 
-    @GET
-    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
-    @Path("/resetPassword/{email}/{username}")
-    public String resetPassword(@DefaultValue("application/json") @HeaderParam("Content-Type") String contentType,
-                                @DefaultValue("application/json") @HeaderParam("Accept") String accept,
-                                @PathParam("username") String username,
-                                @PathParam("email") String email) throws OAuthSystemException {
-        OAuthIssuer oauthIssuerImpl = new OAuthIssuerImpl(new MD5Generator());
-
-        if (username != null && !"".equals(username.trim())) {
-            Account accountOfi = ObjectifyService.ofy().load().key(Key.create(Account.class, username)).now();
-
-
-            AccountReset resetEntity = new AccountReset(accountOfi.getIdentifier(),oauthIssuerImpl.authorizationCode());
-            ObjectifyService.ofy().save().entity(resetEntity).now();
-        }
-
-        return "{}";
-    }
-
-    public static Account resetAccountGetAccount(String username) {
-        if (username != null && !"".equals(username.trim())) {
-            Account accountOfi = ObjectifyService.ofy().load().key(Key.create(Account.class, username)).now();
-            return accountOfi;
+    public static Account getAccount(String username) {
+        if (!Utils.isEmpty(username)) {
+            return ObjectifyService.ofy().load().key(Key.create(Account.class, username)).now();
         }
         return null;
     }
 
     public static AccountReset resetAccount(Account accountOfi) {
-        OAuthIssuer oauthIssuerImpl = new OAuthIssuerImpl(new MD5Generator());
         try {
-            AccountReset resetEntity = new AccountReset(accountOfi.getIdentifier(), oauthIssuerImpl.authorizationCode());
+            String code = new MD5Generator().generateValue();
+
+            AccountReset resetEntity = new AccountReset(accountOfi.getIdentifier(), code);
             ObjectifyService.ofy().save().entity(resetEntity).now();
             return resetEntity;
         } catch (OAuthSystemException e) {
