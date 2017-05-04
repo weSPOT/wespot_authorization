@@ -121,7 +121,6 @@ public class TokenEndpoint {
         CodeToAccount code = ObjectifyService.ofy().load().key(Key.create(CodeToAccount.class, hashMap.get(OAuth.OAUTH_CODE))).now();
         if (code != null) {
             Account account = null;
-            System.out.println(code.getAccount().isLoaded());
             if (!code.getAccount().isLoaded()) {
                 account = ObjectifyService.ofy().load().key(code.getAccount().getKey()).now();
             }

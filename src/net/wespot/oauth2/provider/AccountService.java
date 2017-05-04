@@ -26,6 +26,8 @@ import java.net.URI;
 import java.security.MessageDigest;
 import java.util.Date;
 
+import net.wespot.utils.Utils;
+
 /**
  * ****************************************************************************
  * Copyright (C) 2013 Open Universiteit Nederland
@@ -197,14 +199,14 @@ public class AccountService {
                                  @DefaultValue("application/json") @HeaderParam("Accept") String accept,
                                  String account) {
 
-        OAuthIssuer oauthIssuerImpl = new OAuthIssuerImpl(new MD5Generator());
         try {
+            String accessToken = new MD5Generator().generateValue();
             JSONObject result = new JSONObject();
+            result.put("type", "AuthResponse");
 
             JSONObject accountJson = new JSONObject(account);
             Account accountOfi = ObjectifyService.ofy().load().key(Key.create(Account.class, accountJson.getString("username"))).now();
             if (accountOfi == null) {
-                result.put("type", "AuthResponse");
                 result.put("error" , "username does not exist ");
                 result.put("userName" , false);
 
@@ -212,20 +214,18 @@ public class AccountService {
             }
             String password = accountJson.getString("password");
             if (password == null || !hash(password).equals(accountOfi.getPasswordHash())) {
-                result.put("type", "AuthResponse");
                 result.put("error" , "password incorrect");
                 result.put("password" , false);
 
                 return Response.ok(result.toString(), MediaType.APPLICATION_JSON).build();
             }
 
-            AccessToken at = new AccessToken(oauthIssuerImpl.accessToken(), accountOfi);
+            AccessToken at = new AccessToken(accessToken, accountOfi);
             ObjectifyService.ofy().save().entity(at).now();
 
-            result.put("type", "AuthResponse");
-            result.put("token" , at.getIdentifier());
+            result.put("token", accessToken);
             return Response.ok(result.toString(), MediaType.APPLICATION_JSON)
-                .cookie(new NewCookie("net.wespot.authToken", at.getIdentifier(), "/", "wespot-arlearn.appspot.com", "OAuth token cookie", 3600, false))
+                .cookie(new NewCookie("net.wespot.authToken", accessToken, "/", "wespot-arlearn.appspot.com", "OAuth token cookie", 3600, false))
                 .expires(new Date(System.currentTimeMillis() + 3600))
                 .build();
 
@@ -247,12 +247,12 @@ public class AccountService {
                                  @FormParam("originalPage") String originalPage,
                                  @Context ServletContext servletContext) throws Exception {
 
-        OAuthIssuer oauthIssuerImpl = new OAuthIssuerImpl(new MD5Generator());
         try {
+            OAuthIssuer oauthIssuerImpl = new OAuthIssuerImpl(new MD5Generator());
 
             Account accountOfi = null;
-            if (username != null && !"".equals(username)) {
-                accountOfi= ObjectifyService.ofy().load().key(Key.create(Account.class, username)).now();
+            if (!Utils.isEmpty(username)) {
+                accountOfi = ObjectifyService.ofy().load().key(Key.create(Account.class, username)).now();
             }
 
             if (accountOfi == null) {

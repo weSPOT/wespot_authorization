@@ -29,6 +29,7 @@ import org.apache.amber.oauth2.common.utils.OAuthUtils;
 import java.net.URI;
 import java.net.URISyntaxException;
 
+import net.wespot.utils.Utils;
 
 /**
  * ****************************************************************************
@@ -61,29 +62,6 @@ public class AuthEndpoint {
     }
 
     @POST
-    @Path("/password")
-    public Response credentials(@Context HttpServletRequest request,
-                                @FormParam("account") String account,
-                                @FormParam("pwd") String pwd)
-            throws URISyntaxException, OAuthSystemException {
-        String concat = account + ":" + pwd;
-        MD5Generator md5Generator = new MD5Generator();
-        String md5 = md5Generator.generateValue(concat);
-        System.out.println("accoun " + concat);
-        System.out.println("md5 is " + md5);
-
-        if ("pw".equals("pw")) {
-            OAuthASResponse.OAuthAuthorizationResponseBuilder builder = OAuthASResponse
-                    .authorizationResponse(request, HttpServletResponse.SC_FOUND);
-            final OAuthResponse response = builder.location("/grant.html").buildQueryMessage();
-
-            return Response.status(response.getResponseStatus()).location(new URI("../grant.html")).build();
-
-        }
-        return null;
-    }
-
-    @POST
     public Response authorizePOST(@Context HttpServletRequest request)
             throws URISyntaxException, OAuthSystemException {
         return authorize(request);
@@ -93,104 +71,96 @@ public class AuthEndpoint {
     public Response authorize(@Context HttpServletRequest request)
             throws URISyntaxException, OAuthSystemException {
         try {
-            OAuthAuthzRequest oauthRequest = null;
-
-            OAuthIssuerImpl oauthIssuerImpl = new OAuthIssuerImpl(new MD5Generator());
-            String token = null;
-            System.out.println("cookie set ? " + request.getCookies());
-            if (request.getCookies() != null) {
-                for (Cookie cookie : request.getCookies()) {
-                    if ("net.wespot.authToken".equals(cookie.getName())) {
-                        token = cookie.getValue();
-                    }
-                }
-                System.out.println("cookie set ? " + token);
-
-
-                if (request.getParameter(OAuth.OAUTH_CLIENT_ID) != null) {
-                    ApplicationRegistry application = ObjectifyService.ofy().load().key(Key.create(ApplicationRegistry.class, request.getParameter(OAuth.OAUTH_CLIENT_ID))).now();
-                    if (application == null) {
-                        final Response.ResponseBuilder responseBuilder = Response.status(HttpServletResponse.SC_FOUND);
-
-                        throw new WebApplicationException(
-                                responseBuilder.entity("client_id " + request.getParameter(OAuth.OAUTH_CLIENT_ID) + " is not a valid client id!").build());
-
-                    }
-
-                } else {
-                    final Response.ResponseBuilder responseBuilder = Response.status(HttpServletResponse.SC_FOUND);
-
-                    throw new WebApplicationException(
-                            responseBuilder.entity("OAuth client id needs to be provided by client!!!").build());
-                }
-                if (token != null) {
-                    System.out.println("Token exists");
-                    AccessToken accessToken = ObjectifyService.ofy().load().key(Key.create(AccessToken.class, token)).now();
-                    if (!accessToken.getAccount().isLoaded()) {
-                        ObjectifyService.ofy().load().key(accessToken.getAccount().getKey()).now();
-                    }
-                    System.out.println("accessToken " + accessToken.getAccount().getValue().getIdentifier());
-                    if (accessToken.getAccount().getValue().getIdentifier() != null) {
-                        oauthRequest = new OAuthAuthzRequest(request);
-
-                        //build response according to response_type
-
-                        String responseType = oauthRequest.getParam(OAuth.OAUTH_RESPONSE_TYPE);
-
-                        OAuthASResponse.OAuthAuthorizationResponseBuilder builder = OAuthASResponse
-                                .authorizationResponse(request, HttpServletResponse.SC_FOUND);
-
-                        if (responseType.equals(ResponseType.CODE.toString())) {
-                            String code = oauthIssuerImpl.authorizationCode();
-                            builder.setCode(code);
-
-                            CodeToAccount cta = new CodeToAccount(code, accessToken.getAccount().getValue());
-                            ObjectifyService.ofy().save().entity(cta).now();
-                            System.out.println("code will be sent" + code);
-                        }
-                        if (responseType.equals(ResponseType.TOKEN.toString())) {
-                            builder.setAccessToken(oauthIssuerImpl.accessToken());
-                            builder.setExpiresIn("3600");
-                        }
-
-
-                        String redirectURI = oauthRequest.getParam(OAuth.OAUTH_REDIRECT_URI);
-                        System.out.println("redirect url" + redirectURI);
-                        final OAuthResponse response = builder.location(redirectURI).buildQueryMessage();
-                        URI url = new URI(response.getLocationUri());
-
-                        return Response.status(response.getResponseStatus()).location(url).build();
-                    }
-                }
-            }
-            OAuthASResponse.OAuthAuthorizationResponseBuilder builder = OAuthASResponse
-                    .authorizationResponse(request, HttpServletResponse.SC_FOUND);
-            final OAuthResponse response = builder.location("../Login.html")
+            final OAuthResponse loginPageResponse = OAuthASResponse
+                    .authorizationResponse(request, HttpServletResponse.SC_FOUND)
+                    .location("../Login.html")
                     .setParam(OAuth.OAUTH_REDIRECT_URI, request.getParameter(OAuth.OAUTH_REDIRECT_URI))
                     .setParam(OAuth.OAUTH_CLIENT_ID, request.getParameter(OAuth.OAUTH_CLIENT_ID))
                     .setParam(OAuth.OAUTH_RESPONSE_TYPE, request.getParameter(OAuth.OAUTH_RESPONSE_TYPE))
                     .setParam(OAuth.OAUTH_SCOPE, request.getParameter(OAuth.OAUTH_SCOPE))
                     .buildQueryMessage();
+            URI loginPageUrl = new URI(loginPageResponse.getLocationUri());
+            Response invalidCookieResponse = Response.status(loginPageResponse.getResponseStatus()).location(loginPageUrl).build();
+
+            if (request.getCookies() == null) return invalidCookieResponse;
+
+            String token = null;
+            for (Cookie cookie : request.getCookies()) {
+                if ("net.wespot.authToken".equals(cookie.getName())) {
+                    token = cookie.getValue();
+                }
+            }
+
+            if (token == null) return invalidCookieResponse;
+
+            AccessToken accessToken = ObjectifyService.ofy().load().key(Key.create(AccessToken.class, token)).now();
+            if (!accessToken.getAccount().isLoaded()) {
+                ObjectifyService.ofy().load().key(accessToken.getAccount().getKey()).now();
+            }
+            if (accessToken.getAccount().getValue().getIdentifier() == null) {
+                return invalidCookieResponse;
+            }
+
+            String clientId = request.getParameter(OAuth.OAUTH_CLIENT_ID);
+
+            if (clientId != null) {
+                ApplicationRegistry application = ObjectifyService.ofy().load().key(Key.create(ApplicationRegistry.class, clientId)).now();
+                if (application == null) {
+                    return Response
+                            .status(Response.Status.BAD_REQUEST)
+                            .entity("client_id " + clientId + " is not a valid client id!")
+                            .build();
+                }
+            } else {
+                return Response
+                        .status(Response.Status.BAD_REQUEST)
+                        .entity("OAuth client id needs to be provided by client!")
+                        .build();
+            }
+
+            OAuthAuthzRequest oauthRequest = new OAuthAuthzRequest(request);
+
+            // Build response according to response_type
+            String responseType = oauthRequest.getParam(OAuth.OAUTH_RESPONSE_TYPE);
+
+            OAuthASResponse.OAuthAuthorizationResponseBuilder builder = OAuthASResponse
+                    .authorizationResponse(request, HttpServletResponse.SC_FOUND);
+
+            String code = new MD5Generator().generateValue();
+
+            if (responseType.equals(ResponseType.CODE.toString())) {
+                  builder.setCode(code);
+
+                  CodeToAccount cta = new CodeToAccount(code, accessToken.getAccount().getValue());
+                  ObjectifyService.ofy().save().entity(cta).now();
+            }
+
+            if (responseType.equals(ResponseType.TOKEN.toString())) {
+                  builder.setAccessToken(code);
+                  builder.setExpiresIn("3600");
+            }
+
+            String redirectURI = oauthRequest.getParam(OAuth.OAUTH_REDIRECT_URI);
+            final OAuthResponse response = builder.location(redirectURI).buildQueryMessage();
             URI url = new URI(response.getLocationUri());
-            System.out.println("redirecting to login page" + url);
+
             return Response.status(response.getResponseStatus()).location(url).build();
 
             //TODO: check if redirectURI exists.
 
-
         } catch (OAuthProblemException e) {
-
             final Response.ResponseBuilder responseBuilder = Response.status(HttpServletResponse.SC_FOUND);
 
             String redirectUri = e.getRedirectUri();
 
-            if (OAuthUtils.isEmpty(redirectUri)) {
-                throw new WebApplicationException(
-                        responseBuilder.entity("OAuth callback url needs to be provided by client!!!").build());
+            if (Utils.isEmpty(redirectUri)) {
+                return responseBuilder.entity("OAuth callback url needs to be provided by client!").build();
             }
+
             final OAuthResponse response = OAuthASResponse.errorResponse(HttpServletResponse.SC_FOUND)
                     .error(e)
-                    .location(redirectUri).buildQueryMessage();
+                    .location(redirectUri)
+                    .buildQueryMessage();
             final URI location = new URI(response.getLocationUri());
             return responseBuilder.location(location).build();
         }

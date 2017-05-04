@@ -15,12 +15,15 @@ import org.apache.amber.oauth2.common.utils.OAuthUtils;
 import org.apache.amber.oauth2.rs.request.OAuthAccessResourceRequest;
 import org.apache.amber.oauth2.rs.response.OAuthRSResponse;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
+
+import net.wespot.utils.Utils;
 
 /**
  * ****************************************************************************
@@ -52,28 +55,17 @@ public class ResourceQueryEndpoint {
 
     @GET
     @Produces("text/html")
-    public Response get(@Context javax.servlet.http.HttpServletRequest request) throws OAuthSystemException {
+    public Response get(@Context HttpServletRequest request) throws OAuthSystemException {
         try {
-            // Make the OAuth Request out of this request
-            OAuthAccessResourceRequest oauthRequest = new OAuthAccessResourceRequest(request,
-                    ParameterStyle.QUERY);
+            // Extract access token from request via OAuthAccessResourceRequest
+            String accessToken = new OAuthAccessResourceRequest(request, ParameterStyle.QUERY)
+                    .getAccessToken();
 
-            String accessToken = oauthRequest.getAccessToken();
-            OAuthResponse oauthResponse = OAuthRSResponse
-                    .errorResponse(HttpServletResponse.SC_UNAUTHORIZED)
-                    .setRealm(TestContent.RESOURCE_SERVER_NAME)
-                    .setError(OAuthError.ResourceResponse.INVALID_TOKEN)
-                    .buildHeaderMessage();
-
-            System.out.println("query accesstoken " + accessToken);
             AccessToken at = ObjectifyService.ofy().load().key(Key.create(AccessToken.class, accessToken)).now();
-
-            System.out.println(at.getAccount());
-
             Account account = ObjectifyService.ofy().load().ref(at.getAccount()).now();
             return Response.status(Response.Status.OK).entity(account.toJson()).build();
-        } catch (Exception e) {
-            return null;
+        } catch (OAuthProblemException|NullPointerException e) {
+            return Response.status(Response.Status.BAD_REQUEST).entity("Invalid access token").build();
         }
     }
 
