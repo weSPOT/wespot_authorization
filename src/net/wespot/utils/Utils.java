@@ -1,7 +1,6 @@
 package net.wespot.utils;
 
 import javax.servlet.http.Cookie;
-import java.util.Set;
 
 public final class Utils {
     public static boolean isEmpty(String value) {

@@ -95,13 +95,10 @@ public class AuthEndpoint implements Endpoint {
             String clientId = request.getParameter(OAuth.OAUTH_CLIENT_ID);
 
             ResponseBuilder badRequest = Response.status(Status.BAD_REQUEST);
-            if (clientId != null) {
-                ApplicationRegistry application = DbUtils.getApplication(clientId);
-                if (application == null) {
-                    return badRequest.entity("client_id " + clientId + " is not a valid client id!").build();
-                }
-            } else {
+            if (clientId == null) {
                 return badRequest.entity("OAuth client id needs to be provided by client!").build();
+            } else if (clientId != null && DbUtils.getApplication(clientId) == null) {
+                return badRequest.entity("client_id " + clientId + " is not a valid client id!").build();
             }
 
             OAuthAuthzRequest oauthRequest = new OAuthAuthzRequest(request);

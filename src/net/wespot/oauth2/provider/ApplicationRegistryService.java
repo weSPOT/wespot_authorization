@@ -6,7 +6,11 @@ import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 
 import javax.ws.rs.*;
-import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
+
+import net.wespot.utils.ErrorJson;
+import net.wespot.utils.SuccessJson;
 
 /**
  * ****************************************************************************
@@ -35,12 +39,10 @@ public class ApplicationRegistryService {
     }
 
     @POST
-    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+    @Consumes("application/json")
+    @Produces("application/json")
     @Path("/createApplication")
-    public String createApplication(@DefaultValue("application/json") @HeaderParam("Content-Type") String contentType,
-                                    @DefaultValue("application/json") @HeaderParam("Accept") String accept,
-                                    String application) {
-
+    public Response createApplication(String application) throws JSONException {
         try {
             JSONObject applicationJson = new JSONObject(application);
 
@@ -52,11 +54,12 @@ public class ApplicationRegistryService {
             app.setApplicationName(applicationJson.getString("appName"));
 
             ObjectifyService.ofy().save().entity(app).now();
+
+            SuccessJson successJson = new SuccessJson("application", applicationJson);
+            return Response.ok(successJson.getJson()).build();
         } catch (JSONException e) {
-            e.printStackTrace();
+            ErrorJson errorJson = new ErrorJson("Invalid application JSON");
+            return Response.status(Status.BAD_REQUEST).entity(errorJson.getJson()).build();
         }
-
-
-        return "{}";
     }
 }
