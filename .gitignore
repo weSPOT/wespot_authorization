@@ -4,3 +4,5 @@ src/net/wespot/auth2/provider/SchoolService.java
 src/net/wespot/oauth2/provider/UploadUsers.java
 web/uploadCSV.html
 .DS_Store
+/.idea
+/.idea_modules
