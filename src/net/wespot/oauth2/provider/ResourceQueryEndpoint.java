@@ -1,29 +1,20 @@
 package net.wespot.oauth2.provider;
 
-import com.googlecode.objectify.Key;
 import com.googlecode.objectify.ObjectifyService;
 import net.wespot.db.AccessToken;
 import net.wespot.db.Account;
-import org.apache.amber.oauth2.common.OAuth;
-import org.apache.amber.oauth2.common.error.OAuthError;
 import org.apache.amber.oauth2.common.exception.OAuthProblemException;
 import org.apache.amber.oauth2.common.exception.OAuthSystemException;
-import org.apache.amber.oauth2.common.message.OAuthResponse;
 import org.apache.amber.oauth2.common.message.types.ParameterStyle;
-import org.apache.amber.oauth2.common.utils.OAuthUtils;
-
 import org.apache.amber.oauth2.rs.request.OAuthAccessResourceRequest;
-import org.apache.amber.oauth2.rs.response.OAuthRSResponse;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 
-import net.wespot.utils.Utils;
 import net.wespot.utils.DbUtils;
 
 /**

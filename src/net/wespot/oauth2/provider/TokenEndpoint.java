@@ -1,34 +1,22 @@
 package net.wespot.oauth2.provider;
 
-import javax.servlet.http.HttpServletResponse;
-
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 
-import com.googlecode.objectify.Key;
 import com.googlecode.objectify.ObjectifyService;
 import net.wespot.db.AccessToken;
 import net.wespot.db.Account;
 import net.wespot.db.ApplicationRegistry;
 import net.wespot.db.CodeToAccount;
 import org.apache.amber.oauth2.as.issuer.MD5Generator;
-import org.apache.amber.oauth2.as.issuer.OAuthIssuer;
-import org.apache.amber.oauth2.as.issuer.OAuthIssuerImpl;
-import org.apache.amber.oauth2.as.request.OAuthTokenRequest;
-import org.apache.amber.oauth2.as.response.OAuthASResponse;
 import org.apache.amber.oauth2.common.OAuth;
-import org.apache.amber.oauth2.common.error.OAuthError;
-import org.apache.amber.oauth2.common.exception.OAuthProblemException;
 import org.apache.amber.oauth2.common.exception.OAuthSystemException;
-import org.apache.amber.oauth2.common.message.OAuthResponse;
-import org.apache.amber.oauth2.common.message.types.GrantType;
+import org.codehaus.jettison.json.JSONException;
+import org.codehaus.jettison.json.JSONObject;
 
 import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
 
 import net.wespot.utils.Utils;
 import net.wespot.utils.DbUtils;
@@ -65,34 +53,29 @@ public class TokenEndpoint {
     @POST
     @Consumes("application/x-www-form-urlencoded")
     @Produces("application/json")
-    public Response authorize(@Context HttpServletRequest request) throws OAuthSystemException {
-        HashMap<String, String> hashMap = new HashMap<String, String>();
+    public Response authorize(@Context HttpServletRequest request) throws OAuthSystemException, JSONException {
+        HashMap<String, String> requestData = new HashMap<String, String>();
 
-        String clientId = request.getParameter(OAuth.OAUTH_CLIENT_ID);
-        String clientSecret = request.getParameter(OAuth.OAUTH_CLIENT_SECRET);
-        String code = request.getParameter(OAuth.OAUTH_CODE);
-        String grantType = request.getParameter(OAuth.OAUTH_GRANT_TYPE);
+        requestData.put(OAuth.OAUTH_CLIENT_ID, request.getParameter(OAuth.OAUTH_CLIENT_ID));
+        requestData.put(OAuth.OAUTH_CLIENT_SECRET, request.getParameter(OAuth.OAUTH_CLIENT_SECRET));
+        requestData.put(OAuth.OAUTH_CODE, request.getParameter(OAuth.OAUTH_CODE));
+        requestData.put(OAuth.OAUTH_GRANT_TYPE, request.getParameter(OAuth.OAUTH_GRANT_TYPE));
 
-        if (Utils.isEmpty(clientId) || Utils.isEmpty(clientSecret) || Utils.isEmpty(code) || Utils.isEmpty(grantType)) {
+        if (Utils.hasEmpty(requestData.keySet())) {
             return Response.status(Response.Status.BAD_REQUEST).entity("Missing field!").build();
         }
 
-        hashMap.put(OAuth.OAUTH_CLIENT_ID, clientId);
-        hashMap.put(OAuth.OAUTH_CLIENT_SECRET, clientSecret);
-        hashMap.put(OAuth.OAUTH_CODE, code);
-        hashMap.put(OAuth.OAUTH_GRANT_TYPE, grantType);
-
-        return authorize(hashMap);
+        return authorize(requestData);
     }
 
     @GET
     @Consumes("application/x-www-form-urlencoded")
     @Produces("application/json")
-    public Response authorizeGet(@Context HttpServletRequest request) throws OAuthSystemException {
+    public Response authorizeGet(@Context HttpServletRequest request) throws OAuthSystemException, JSONException {
         return authorize(request);
     }
 
-    private Response authorize(HashMap<String, String> hashMap) throws OAuthSystemException {
+    private Response authorize(HashMap<String, String> hashMap) throws OAuthSystemException, JSONException {
         String clientId = hashMap.get(OAuth.OAUTH_CLIENT_ID);
 
         ApplicationRegistry application = DbUtils.getApplication(clientId);
@@ -111,14 +94,6 @@ public class TokenEndpoint {
         }
 
         String accessToken = new MD5Generator().generateValue();
-
-        System.out.println("access token is " + accessToken);
-        OAuthResponse response = OAuthASResponse
-                .tokenResponse(HttpServletResponse.SC_OK)
-                .setAccessToken(accessToken)
-                .setExpiresIn("3600")
-                .buildJSONMessage();
-
         CodeToAccount code = DbUtils.getCodeToAccount(hashMap.get(OAuth.OAUTH_CODE));
         if (code != null) {
             Account account = null;
@@ -129,7 +104,10 @@ public class TokenEndpoint {
             ObjectifyService.ofy().save().entity(at).now();
         }
 
-        return Response.status(response.getResponseStatus()).entity(response.getBody()).build();
-    }
+        JSONObject result = new JSONObject()
+                .put("access_token", accessToken)
+                .put("expires_in", 3600);
 
+        return Response.ok(result.toString()).build();
+    }
 }

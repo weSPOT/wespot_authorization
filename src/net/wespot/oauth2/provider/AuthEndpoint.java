@@ -1,14 +1,11 @@
 package net.wespot.oauth2.provider;
 
-import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 
-import com.googlecode.objectify.Key;
 import com.googlecode.objectify.ObjectifyService;
 import net.wespot.db.AccessToken;
 import net.wespot.db.Account;
@@ -17,14 +14,12 @@ import net.wespot.db.CodeToAccount;
 import org.apache.amber.oauth2.common.OAuth;
 
 import org.apache.amber.oauth2.as.issuer.MD5Generator;
-import org.apache.amber.oauth2.as.issuer.OAuthIssuerImpl;
 import org.apache.amber.oauth2.as.request.OAuthAuthzRequest;
 import org.apache.amber.oauth2.as.response.OAuthASResponse;
 import org.apache.amber.oauth2.common.exception.OAuthProblemException;
 import org.apache.amber.oauth2.common.exception.OAuthSystemException;
 import org.apache.amber.oauth2.common.message.OAuthResponse;
 import org.apache.amber.oauth2.common.message.types.ResponseType;
-import org.apache.amber.oauth2.common.utils.OAuthUtils;
 
 import java.net.URI;
 import java.net.URISyntaxException;

@@ -1,12 +1,19 @@
 package net.wespot.utils;
 
 import javax.servlet.http.Cookie;
-import javax.ws.rs.core.NewCookie;
-import java.util.Map;
+import java.util.Set;
 
 public final class Utils {
     public static boolean isEmpty(String value) {
         return value == null || "".equals(value.trim());
+    }
+
+    public static boolean hasEmpty(Set<String> set) {
+        boolean hasEmpty = false;
+        for (String key : set) {
+            if (!hasEmpty) hasEmpty = Utils.isEmpty(key);
+        }
+        return hasEmpty;
     }
 
     public static String getTokenFromCookies(Cookie[] cookies) {
