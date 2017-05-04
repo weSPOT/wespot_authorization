@@ -82,14 +82,7 @@ public class AuthEndpoint {
             URI loginPageUrl = new URI(loginPageResponse.getLocationUri());
             Response invalidCookieResponse = Response.status(loginPageResponse.getResponseStatus()).location(loginPageUrl).build();
 
-            if (request.getCookies() == null) return invalidCookieResponse;
-
-            String token = null;
-            for (Cookie cookie : request.getCookies()) {
-                if ("net.wespot.authToken".equals(cookie.getName())) {
-                    token = cookie.getValue();
-                }
-            }
+            String token = Utils.getTokenFromCookies(request.getCookies());
 
             if (token == null) return invalidCookieResponse;
 

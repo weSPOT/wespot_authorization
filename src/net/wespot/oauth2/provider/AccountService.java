@@ -135,18 +135,10 @@ public class AccountService {
             result.put("type", "AuthResponse");
             result.put("logout" , true);
 
-            if (request.getCookies() != null) {
-                String token = null;
-                for (Cookie cookie : request.getCookies()) {
-                    if ("net.wespot.authToken".equals(cookie.getName())) {
-                        token = cookie.getValue();
-                    }
-                }
-                System.out.println("cookie set ? " + token);
-                if (token != null) {
-                    ObjectifyService.ofy().delete().key(Key.create(AccessToken.class, token)).now();
-                    result.put("accessTokenDeleted" , token);
-                }
+            String token = Utils.getTokenFromCookies(request.getCookies());
+            if (token != null) {
+                ObjectifyService.ofy().delete().key(Key.create(AccessToken.class, token)).now();
+                result.put("accessTokenDeleted" , token);
             }
 
             return Response.ok(result.toString(), MediaType.APPLICATION_JSON)
@@ -175,17 +167,17 @@ public class AccountService {
             result.put("type", "AuthResponse");
 
             JSONObject accountJson = new JSONObject(account);
-            Account accountOfi = ObjectifyService.ofy().load().key(Key.create(Account.class, accountJson.getString("username"))).now();
+            Account accountOfi = AccountService.getAccount(accountJson.getString("username"));
             if (accountOfi == null) {
-                result.put("error" , "username does not exist ");
-                result.put("userName" , false);
+                result.put("error", "username does not exist ");
+                result.put("userName", false);
 
                 return Response.ok(result.toString(), MediaType.APPLICATION_JSON).build();
             }
             String password = accountJson.getString("password");
             if (password == null || !hash(password).equals(accountOfi.getPasswordHash())) {
-                result.put("error" , "password incorrect");
-                result.put("password" , false);
+                result.put("error", "password incorrect");
+                result.put("password", false);
 
                 return Response.ok(result.toString(), MediaType.APPLICATION_JSON).build();
             }
@@ -208,7 +200,7 @@ public class AccountService {
 
     @POST
     @Path("/authenticateFw")
-    public String authenticateFw(@DefaultValue("application/json") @HeaderParam("Content-Type") String contentType,
+    public Response authenticateFw(@DefaultValue("application/json") @HeaderParam("Content-Type") String contentType,
                                  @Context final HttpServletResponse response,
                                  @Context final HttpServletRequest request,
                                  @FormParam("school") Long school,
@@ -218,42 +210,40 @@ public class AccountService {
                                  @Context ServletContext servletContext) throws Exception {
 
         try {
-            OAuthIssuer oauthIssuerImpl = new OAuthIssuerImpl(new MD5Generator());
-
-            Account accountOfi = null;
-            if (!Utils.isEmpty(username)) {
-                accountOfi = ObjectifyService.ofy().load().key(Key.create(Account.class, username)).now();
-            }
+            Account accountOfi = AccountService.getAccount(username);
 
             if (accountOfi == null) {
                 URI location = new URI("../" + originalPage + "?incorrectUsername");
-                throw new WebApplicationException(Response.temporaryRedirect(location).build());
+                return Response.temporaryRedirect(location).build();
             }
 
-            if (password == null || "".equals(password)|| !hash(password).equals(accountOfi.getPasswordHash())) {
+            if (Utils.isEmpty(password) || !hash(password).equals(accountOfi.getPasswordHash())) {
                 URI location = new URI("../" + originalPage + "?incorrectPassword");
-                throw new WebApplicationException(Response.temporaryRedirect(location).build());
+                return Response.temporaryRedirect(location).build();
             }
-            AccessToken at = new AccessToken(oauthIssuerImpl.accessToken(), accountOfi);
+
+            OAuthIssuer oauthIssuer = new OAuthIssuerImpl(new MD5Generator());
+
+            AccessToken at = new AccessToken(oauthIssuer.accessToken(), accountOfi);
             ObjectifyService.ofy().save().entity(at).now();
 
-            String code = oauthIssuerImpl.authorizationCode();
+            String code = oauthIssuer.authorizationCode();
             CodeToAccount cta = new CodeToAccount(code, accountOfi);
             ObjectifyService.ofy().save().entity(cta).now();
 
             URI location = new URI("http://streetlearn.appspot.com/oauth/wespot?code=" + code);
 
-            throw new WebApplicationException(Response.temporaryRedirect(location).build());
+            return Response.temporaryRedirect(location).build();
         } catch (OAuthSystemException|NullPointerException e) {
             e.printStackTrace();
         }
 
-        return "<html></html>";
+        return Response.ok("<html></html>").build();
     }
 
     @POST
     @Path("/authenticateFwAndroid")
-    public String authenticateFwAndroid(@DefaultValue("application/json") @HeaderParam("Content-Type") String contentType,
+    public Response authenticateFwAndroid(@DefaultValue("application/json") @HeaderParam("Content-Type") String contentType,
                                  @Context final HttpServletResponse response,
                                  @Context final HttpServletRequest request,
                                  @FormParam("school") Long school,
@@ -262,13 +252,11 @@ public class AccountService {
                                  @FormParam("originalPage") String originalPage,
                                  @Context ServletContext servletContext) throws Exception {
 
-        if (username != null && !"".equals(username) && school != null && school != 0) {
+        if (!Utils.isEmpty(username) && school != null && school != 0) {
             username = school + "_" + username;
         }
 
-        authenticateFw(contentType, response, request, school, username, password, originalPage, servletContext);
-
-        return "<html></html>";
+        return authenticateFw(contentType, response, request, school, username, password, originalPage, servletContext);
     }
 
 
