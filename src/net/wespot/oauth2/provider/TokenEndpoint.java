@@ -22,8 +22,7 @@ import java.util.HashMap;
 
 import net.wespot.utils.Utils;
 import net.wespot.utils.DbUtils;
-import net.wespot.utils.ErrorJson;
-import net.wespot.utils.SuccessJson;
+import net.wespot.utils.ErrorResponse;
 
 /**
  * ****************************************************************************
@@ -73,19 +72,16 @@ public class TokenEndpoint implements Endpoint {
         final ResponseBuilder badRequest = Response.status(Status.BAD_REQUEST);
 
         if (Utils.isEmpty(clientId) || Utils.isEmpty(clientSecret) || Utils.isEmpty(code) || Utils.isEmpty(grantType)) {
-            ErrorJson errorJson = new ErrorJson("Missing field!");
-            return badRequest.entity(errorJson.getJson()).build();
+            return new ErrorResponse("Missing field!").build();
         }
 
         ApplicationRegistry application = DbUtils.getApplication(clientId);
         if (application == null) {
-            ErrorJson errorJson = new ErrorJson("client_id " + clientId + " is not a valid client id!");
-            return badRequest.entity(errorJson.getJson()).build();
+            return new ErrorResponse("client_id " + clientId + " is not a valid client id!").build();
         }
 
         if (!application.getClientSecret().equals(clientSecret)) {
-            ErrorJson errorJson = new ErrorJson("client_secret does not match client_id");
-            return badRequest.entity(errorJson.getJson()).build();
+            return new ErrorResponse("client_secret does not match client_id").build();
         }
 
         CodeToAccount accountCode = DbUtils.getCodeToAccount(code);

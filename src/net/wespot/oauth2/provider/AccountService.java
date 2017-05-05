@@ -26,8 +26,8 @@ import java.util.Date;
 
 import net.wespot.utils.Utils;
 import net.wespot.utils.DbUtils;
-import net.wespot.utils.ErrorJson;
-import net.wespot.utils.SuccessJson;
+import net.wespot.utils.ErrorResponse;
+import net.wespot.utils.SuccessResponse;
 
 /**
  * ****************************************************************************
@@ -68,6 +68,7 @@ public class AccountService {
     }
 
     @POST
+    @Consumes("application/json")
     @Produces("application/json")
     @Path("/createAccount")
     public Response createAccount(String account) throws JSONException {
@@ -76,15 +77,13 @@ public class AccountService {
             String username = accountJson.getString("username");
 
             if (DbUtils.getAccount(username) != null) {
-                ErrorJson errorJson = new ErrorJson("Account already exists!");
-                return Response.status(Status.BAD_REQUEST).entity(errorJson.getJson()).build();
+                return new ErrorResponse("Username taken").build();
             }
 
             String email = accountJson.getString("email");
 
             if (!Utils.validEmail(email)) {
-                ErrorJson errorJson = new ErrorJson("Invalid email adress!");
-                return Response.status(Status.BAD_REQUEST).entity(errorJson.getJson()).build();
+                return new ErrorResponse("Invalid email address").build();
             }
 
             createAccountStatic(username,
@@ -93,11 +92,9 @@ public class AccountService {
                     accountJson.getString("lastName"),
                     email);
 
-            SuccessJson successJson = new SuccessJson("account", accountJson);
-            return Response.ok(successJson.getJson()).build();
+            return new SuccessResponse("account", accountJson).build();
         } catch (JSONException e) {
-            ErrorJson errorJson = new ErrorJson("Invalid account JSON");
-            return Response.status(Status.BAD_REQUEST).entity(errorJson.getJson()).build();
+            return new ErrorResponse("Invalid account JSON").build();
         }
     }
 

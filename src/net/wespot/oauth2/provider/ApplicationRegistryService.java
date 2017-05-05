@@ -9,8 +9,8 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
-import net.wespot.utils.ErrorJson;
-import net.wespot.utils.SuccessJson;
+import net.wespot.utils.ErrorResponse;
+import net.wespot.utils.SuccessResponse;
 
 /**
  * ****************************************************************************
@@ -55,11 +55,9 @@ public class ApplicationRegistryService {
 
             ObjectifyService.ofy().save().entity(app).now();
 
-            SuccessJson successJson = new SuccessJson("application", applicationJson);
-            return Response.ok(successJson.getJson()).build();
+            return new SuccessResponse("application", applicationJson).build();
         } catch (JSONException e) {
-            ErrorJson errorJson = new ErrorJson("Invalid application JSON");
-            return Response.status(Status.BAD_REQUEST).entity(errorJson.getJson()).build();
+            return new ErrorResponse("Invalid application JSON").build();
         }
     }
 }
