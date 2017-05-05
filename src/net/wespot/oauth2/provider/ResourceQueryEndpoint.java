@@ -3,6 +3,7 @@ package net.wespot.oauth2.provider;
 import com.googlecode.objectify.ObjectifyService;
 import net.wespot.db.AccessToken;
 import net.wespot.db.Account;
+import org.codehaus.jettison.json.JSONException;
 import org.apache.amber.oauth2.common.exception.OAuthProblemException;
 import org.apache.amber.oauth2.common.exception.OAuthSystemException;
 import org.apache.amber.oauth2.common.message.types.ParameterStyle;
@@ -17,6 +18,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
 import net.wespot.utils.DbUtils;
+import net.wespot.utils.ErrorJson;
 
 /**
  * ****************************************************************************
@@ -47,8 +49,8 @@ public class ResourceQueryEndpoint {
     }
 
     @GET
-    @Produces("text/html")
-    public Response get(@Context HttpServletRequest request) throws OAuthSystemException {
+    @Produces("application/json")
+    public Response get(@Context HttpServletRequest request) throws OAuthSystemException, JSONException {
         try {
             // Extract access token from request via OAuthAccessResourceRequest
             String accessToken = new OAuthAccessResourceRequest(request, ParameterStyle.QUERY)
@@ -58,7 +60,8 @@ public class ResourceQueryEndpoint {
             Account account = ObjectifyService.ofy().load().ref(at.getAccount()).now();
             return Response.ok(account.toJson()).build();
         } catch (OAuthProblemException|NullPointerException e) {
-            return Response.status(Status.BAD_REQUEST).entity("Invalid access token").build();
+            ErrorJson errorJson = new ErrorJson("Invalid access token");
+            return Response.status(Status.BAD_REQUEST).entity(errorJson.getJson()).build();
         }
     }
 
