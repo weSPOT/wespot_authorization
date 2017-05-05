@@ -13,20 +13,21 @@ import org.apache.amber.oauth2.common.exception.OAuthSystemException;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 
-import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.NewCookie;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.security.MessageDigest;
 import java.util.Date;
 
 import net.wespot.utils.Utils;
 import net.wespot.utils.DbUtils;
+import net.wespot.utils.ErrorJson;
+import net.wespot.utils.SuccessJson;
 
 /**
  * ****************************************************************************
@@ -58,198 +59,158 @@ public class AccountService {
     }
 
     @GET
-    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+    @Produces("application/json")
     @Path("/accountExists/{username}")
-    public String accountExists(@PathParam("username") String username) {
-        try {
-            JSONObject result = new JSONObject();
-            Account account = DbUtils.getAccount(username);
-            result.put("accountExists", account != null);
-            return result.toString();
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-        return "{}";
+    public String accountExists(@PathParam("username") String username) throws JSONException {
+        JSONObject result = new JSONObject();
+        result.put("accountExists", DbUtils.getAccount(username) != null);
+        return result.toString();
     }
 
     @POST
-    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+    @Produces("application/json")
     @Path("/createAccount")
-    public String createAccount(@DefaultValue("application/json") @HeaderParam("Content-Type") String contentType,
-                                @DefaultValue("application/json") @HeaderParam("Accept") String accept,
-                                String account) {
-
+    public Response createAccount(String account) throws JSONException {
         try {
             JSONObject accountJson = new JSONObject(account);
+            String username = accountJson.getString("username");
 
-            createAccountStatic(accountJson.getString("username"),
+            if (DbUtils.getAccount(username) != null) {
+                ErrorJson errorJson = new ErrorJson("Account already exists!");
+                return Response.status(Status.BAD_REQUEST).entity(errorJson.getJson()).build();
+            }
+
+            createAccountStatic(username,
                     accountJson.getString("password"),
                     accountJson.getString("firstName"),
                     accountJson.getString("lastName"),
                     accountJson.getString("email"));
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
 
-        return "{}";
+            SuccessJson successJson = new SuccessJson("account", accountJson);
+            return Response.ok(successJson.getJson()).build();
+        } catch (JSONException e) {
+            ErrorJson errorJson = new ErrorJson("Invalid account JSON");
+            return Response.status(Status.BAD_REQUEST).entity(errorJson.getJson()).build();
+        }
     }
 
     public static Account createAccountStatic(String username, String password, String firstName, String lastName, String email) {
-        Account accountOfi = new Account(username, username);
-        accountOfi.setPasswordHash(hash(password));
-        accountOfi.setName(firstName + " " + lastName);
-        accountOfi.setFamilyName(lastName);
-        accountOfi.setGivenName(firstName);
-        accountOfi.setEmail(email);
+        Account account = new Account(username, username);
+        account.setPasswordHash(hash(password));
+        account.setName(firstName + " " + lastName);
+        account.setFamilyName(lastName);
+        account.setGivenName(firstName);
+        account.setEmail(email);
 
-        ObjectifyService.ofy().save().entity(accountOfi);
-        return accountOfi;
-    }
-
-    public static AccountReset resetAccount(Account accountOfi) {
-        try {
-            String code = new MD5Generator().generateValue();
-
-            AccountReset resetEntity = new AccountReset(accountOfi.getIdentifier(), code);
-            ObjectifyService.ofy().save().entity(resetEntity).now();
-            return resetEntity;
-        } catch (OAuthSystemException e) {
-            e.printStackTrace();
-        }
-        return null;
+        ObjectifyService.ofy().save().entity(account);
+        return account;
     }
 
     @GET
+    @Produces("application/json")
     @Path("/logout")
-    public Response logout(@Context HttpServletRequest request) {
+    public Response logout(@Context HttpServletRequest request) throws JSONException {
+        JSONObject result = new JSONObject();
+        result.put("type", "AuthResponse");
+        result.put("logout" , true);
 
-        try {
-            JSONObject result = new JSONObject();
-            result.put("type", "AuthResponse");
-            result.put("logout" , true);
-
-            String token = Utils.getTokenFromCookies(request.getCookies());
-            if (token != null) {
-                ObjectifyService.ofy().delete().key(Key.create(AccessToken.class, token)).now();
-                result.put("accessTokenDeleted" , token);
-            }
-
-            return Response.ok(result.toString(), MediaType.APPLICATION_JSON)
-                    .header(
-                        "Set-Cookie",
-                        "net.wespot.authToken=deleted;Domain=.wespot-arlearn.appspot.com;Path=/;Expires=Thu, 01-Jan-1970 00:00:01 GMT"
-                    )
-                    .build();
-        } catch (JSONException e) {
-            e.printStackTrace();
-            return null;
+        String token = Utils.getTokenFromCookies(request.getCookies());
+        if (token != null) {
+            ObjectifyService.ofy().delete().key(Key.create(AccessToken.class, token)).now();
+            result.put("accessTokenDeleted" , token);
         }
 
+        return Response.ok(result.toString())
+                .header(
+                    "Set-Cookie",
+                    "net.wespot.authToken=deleted;Domain=.wespot-arlearn.appspot.com;Path=/;Expires=Thu, 01-Jan-1970 00:00:01 GMT"
+                )
+                .build();
     }
 
     @POST
-    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+    @Produces("application/json")
     @Path("/authenticate")
-    public Response authenticate(@DefaultValue("application/json") @HeaderParam("Content-Type") String contentType,
-                                 @DefaultValue("application/json") @HeaderParam("Accept") String accept,
-                                 String account) {
+    public Response authenticate(String account) throws JSONException, OAuthSystemException {
+        JSONObject result = new JSONObject();
+        result.put("type", "AuthResponse");
 
-        try {
-            JSONObject result = new JSONObject();
-            result.put("type", "AuthResponse");
+        JSONObject accountJson = new JSONObject(account);
+        Account accountOfi = DbUtils.getAccount(accountJson.getString("username"));
+        if (accountOfi == null) {
+            result.put("error", "username does not exist ");
+            result.put("userName", false);
 
-            JSONObject accountJson = new JSONObject(account);
-            Account accountOfi = DbUtils.getAccount(accountJson.getString("username"));
-            if (accountOfi == null) {
-                result.put("error", "username does not exist ");
-                result.put("userName", false);
+            return Response.ok(result.toString()).build();
+        }
+        String password = accountJson.getString("password");
+        if (password == null || !hash(password).equals(accountOfi.getPasswordHash())) {
+            result.put("error", "password incorrect");
+            result.put("password", false);
 
-                return Response.ok(result.toString(), MediaType.APPLICATION_JSON).build();
-            }
-            String password = accountJson.getString("password");
-            if (password == null || !hash(password).equals(accountOfi.getPasswordHash())) {
-                result.put("error", "password incorrect");
-                result.put("password", false);
+            return Response.ok(result.toString()).build();
+        }
 
-                return Response.ok(result.toString(), MediaType.APPLICATION_JSON).build();
-            }
+        String accessToken = new MD5Generator().generateValue();
+        AccessToken at = new AccessToken(accessToken, accountOfi);
+        ObjectifyService.ofy().save().entity(at).now();
 
-            String accessToken = new MD5Generator().generateValue();
-            AccessToken at = new AccessToken(accessToken, accountOfi);
-            ObjectifyService.ofy().save().entity(at).now();
-
-            result.put("token", accessToken);
-            return Response.ok(result.toString(), MediaType.APPLICATION_JSON)
+        result.put("token", accessToken);
+        return Response.ok(result.toString())
                 .cookie(new NewCookie("net.wespot.authToken", accessToken, "/", "wespot-arlearn.appspot.com", "OAuth token cookie", 3600, false))
                 .expires(new Date(System.currentTimeMillis() + 3600))
                 .build();
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        return null;
     }
 
     @POST
     @Path("/authenticateFw")
-    public Response authenticateFw(@DefaultValue("application/json") @HeaderParam("Content-Type") String contentType,
-                                 @Context final HttpServletResponse response,
-                                 @Context final HttpServletRequest request,
-                                 @FormParam("school") Long school,
-                                 @FormParam("username") String username,
-                                 @FormParam("password") String password,
-                                 @FormParam("originalPage") String originalPage,
-                                 @Context ServletContext servletContext) throws Exception {
+    public Response authenticateFw(@FormParam("username") String username,
+                                   @FormParam("password") String password,
+                                   @FormParam("originalPage") String originalPage) throws URISyntaxException {
 
         try {
-            Account accountOfi = DbUtils.getAccount(username);
+            Account account = DbUtils.getAccount(username);
 
-            if (accountOfi == null) {
+            if (account == null) {
                 URI location = new URI("../" + originalPage + "?incorrectUsername");
                 return Response.temporaryRedirect(location).build();
             }
 
-            if (Utils.isEmpty(password) || !hash(password).equals(accountOfi.getPasswordHash())) {
+            if (Utils.isEmpty(password) || !hash(password).equals(account.getPasswordHash())) {
                 URI location = new URI("../" + originalPage + "?incorrectPassword");
                 return Response.temporaryRedirect(location).build();
             }
 
             OAuthIssuer oauthIssuer = new OAuthIssuerImpl(new MD5Generator());
 
-            AccessToken at = new AccessToken(oauthIssuer.accessToken(), accountOfi);
+            AccessToken at = new AccessToken(oauthIssuer.accessToken(), account);
             ObjectifyService.ofy().save().entity(at).now();
 
             String code = oauthIssuer.authorizationCode();
-            CodeToAccount cta = new CodeToAccount(code, accountOfi);
+            CodeToAccount cta = new CodeToAccount(code, account);
             ObjectifyService.ofy().save().entity(cta).now();
 
             URI location = new URI("http://streetlearn.appspot.com/oauth/wespot?code=" + code);
 
             return Response.temporaryRedirect(location).build();
         } catch (OAuthSystemException|NullPointerException e) {
-            e.printStackTrace();
+            URI location = new URI("../" + originalPage + "?incorrectData");
+            return Response.temporaryRedirect(location).build();
         }
-
-        return Response.ok("<html></html>").build();
     }
 
     @POST
     @Path("/authenticateFwAndroid")
-    public Response authenticateFwAndroid(@DefaultValue("application/json") @HeaderParam("Content-Type") String contentType,
-                                 @Context final HttpServletResponse response,
-                                 @Context final HttpServletRequest request,
-                                 @FormParam("school") Long school,
-                                 @FormParam("username") String username,
-                                 @FormParam("password") String password,
-                                 @FormParam("originalPage") String originalPage,
-                                 @Context ServletContext servletContext) throws Exception {
+    public Response authenticateFwAndroid(@FormParam("school") Long school,
+                                          @FormParam("username") String username,
+                                          @FormParam("password") String password,
+                                          @FormParam("originalPage") String originalPage) throws URISyntaxException {
 
         if (!Utils.isEmpty(username) && school != null && school != 0) {
             username = school + "_" + username;
         }
 
-        return authenticateFw(contentType, response, request, school, username, password, originalPage, servletContext);
+        return authenticateFw(username, password, originalPage);
     }
 
 
@@ -267,6 +228,14 @@ public class AccountService {
             e.printStackTrace();
         }
         return "";
+    }
+
+    public static AccountReset resetAccount(Account account) throws OAuthSystemException {
+        String code = new MD5Generator().generateValue();
+
+        AccountReset resetEntity = new AccountReset(account.getIdentifier(), code);
+        ObjectifyService.ofy().save().entity(resetEntity).now();
+        return resetEntity;
     }
 
     public static void resetPassword(String resetId, String password) {
