@@ -113,7 +113,7 @@ public class AccountService {
             accountOfi.setName(accountJson.getString("firstname") + " " + accountJson.getString("familyName"));
             accountOfi.setFamilyName(accountJson.getString("familyName"));
             accountOfi.setGivenName(accountJson.getString("firstname"));
-            if (accountJson.has("pictureUrl")) account.setPictureUrl(accountJson.getString("pictureUrl"));
+            if (accountJson.has("pictureUrl")) accountOfi.setPictureUrl(accountJson.getString("pictureUrl"));
             accountOfi.setEmail(accountJson.getString("email"));
 
 
