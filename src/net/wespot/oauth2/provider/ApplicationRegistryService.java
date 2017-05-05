@@ -9,6 +9,7 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
+import net.wespot.utils.DbUtils;
 import net.wespot.utils.ErrorResponse;
 import net.wespot.utils.SuccessResponse;
 
@@ -45,12 +46,17 @@ public class ApplicationRegistryService {
     public Response createApplication(String application) throws JSONException {
         try {
             JSONObject applicationJson = new JSONObject(application);
+            String clientId = applicationJson.getString("clientId");
+
+            if (DbUtils.getApplication(clientId) != null) {
+                return new ErrorResponse("Client id is already taken").build();
+            }
 
             ApplicationRegistry app = new ApplicationRegistry();
             app.setRedirectUri(applicationJson.getString("redirectUri"));
             app.setClientSecret(applicationJson.getString("sharedSecret"));
-            app.setClientId(applicationJson.getString("clientId"));
-            app.setIdentifier(applicationJson.getString("clientId"));
+            app.setClientId(clientId);
+            app.setIdentifier(clientId);
             app.setApplicationName(applicationJson.getString("appName"));
 
             ObjectifyService.ofy().save().entity(app).now();
