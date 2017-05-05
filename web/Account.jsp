@@ -1,8 +1,7 @@
 <%@ page import="net.wespot.oauth2.provider.AccountService" %>
-<%@ page import="java.util.regex.Matcher" %>
-<%@ page import="java.util.regex.Pattern" %>
 <%@ page import="java.util.List" %>
 <%@ page import="java.util.ArrayList" %>
+<%@ page import="net.wespot.utils.Utils" %>
 <!DOCTYPE html>
 <html>
 <head lang="en">
@@ -39,12 +38,7 @@
     }
 
     if (email != null) {
-        String EMAIL_PATTERN = "^[_A-Za-z0-9-]+(\\.[_A-Za-z0-9-]+)*@[A-Za-z0-9-]+(\\.[A-Za-z0-9-]+)*(\\.[A-Za-z]{2,})$";
-
-        Pattern pattern = Pattern.compile(EMAIL_PATTERN);
-        Matcher matcher = pattern.matcher(email);
-
-        if (!matcher.matches() && !incorrectFields.contains("email")) {
+        if (!Utils.validEmail(email) && !incorrectFields.contains("email")) {
             incorrectFields.add("email");
         }
     }

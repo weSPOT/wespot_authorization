@@ -80,11 +80,18 @@ public class AccountService {
                 return Response.status(Status.BAD_REQUEST).entity(errorJson.getJson()).build();
             }
 
+            String email = accountJson.getString("email");
+
+            if (!Utils.validEmail(email)) {
+                ErrorJson errorJson = new ErrorJson("Invalid email adress!");
+                return Response.status(Status.BAD_REQUEST).entity(errorJson.getJson()).build();
+            }
+
             createAccountStatic(username,
                     accountJson.getString("password"),
                     accountJson.getString("firstName"),
                     accountJson.getString("lastName"),
-                    accountJson.getString("email"));
+                    email);
 
             SuccessJson successJson = new SuccessJson("account", accountJson);
             return Response.ok(successJson.getJson()).build();
