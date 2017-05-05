@@ -18,8 +18,6 @@ import org.apache.amber.oauth2.common.exception.OAuthSystemException;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 
-import java.util.HashMap;
-
 import net.wespot.utils.Utils;
 import net.wespot.utils.DbUtils;
 import net.wespot.utils.ErrorResponse;

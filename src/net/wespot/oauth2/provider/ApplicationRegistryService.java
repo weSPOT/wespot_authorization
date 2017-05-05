@@ -7,7 +7,6 @@ import org.codehaus.jettison.json.JSONObject;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
 
 import net.wespot.utils.DbUtils;
 import net.wespot.utils.ErrorResponse;

@@ -2,7 +2,6 @@ package net.wespot.utils;
 
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
-import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
 public final class SuccessResponse extends JsonResponse {
