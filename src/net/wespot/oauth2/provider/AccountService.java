@@ -101,13 +101,19 @@ public class AccountService {
 
         try {
             JSONObject accountJson = new JSONObject(account);
-            Account accountOfi = new Account(accountJson.getString("username"),accountJson.getString("username")) ;
+            String username = accountJson.getString("username");
+
+            if (ObjectifyService.ofy().load().key(Key.create(Account.class, username)).now() != null) {
+                return "Account already exists!";
+            }
+
+            Account accountOfi = new Account(username, username) ;
             accountOfi.setPasswordHash(hash(accountJson.getString("password")));
 
-            accountOfi.setName(accountJson.getString("firstname")+" "+accountJson.getString("familyName"));
+            accountOfi.setName(accountJson.getString("firstname") + " " + accountJson.getString("familyName"));
             accountOfi.setFamilyName(accountJson.getString("familyName"));
             accountOfi.setGivenName(accountJson.getString("firstname"));
-            if (accountJson.has("pictureUrl")) accountOfi.setPictureUrl(accountJson.getString("pictureUrl"));
+            if (accountJson.has("pictureUrl")) account.setPictureUrl(accountJson.getString("pictureUrl"));
             accountOfi.setEmail(accountJson.getString("email"));
 
 
