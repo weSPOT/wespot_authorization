@@ -65,11 +65,10 @@ public class TokenEndpoint implements Endpoint {
         final String clientId = request.getParameter(OAuth.OAUTH_CLIENT_ID);
         final String clientSecret = request.getParameter(OAuth.OAUTH_CLIENT_SECRET);
         final String code = request.getParameter(OAuth.OAUTH_CODE);
-        final String grantType = request.getParameter(OAuth.OAUTH_GRANT_TYPE);
 
         final ResponseBuilder badRequest = Response.status(Status.BAD_REQUEST);
 
-        if (Utils.isEmpty(clientId) || Utils.isEmpty(clientSecret) || Utils.isEmpty(code) || Utils.isEmpty(grantType)) {
+        if (Utils.isEmpty(clientId) || Utils.isEmpty(clientSecret) || Utils.isEmpty(code)) {
             return new ErrorResponse("Missing field!").build();
         }
 
