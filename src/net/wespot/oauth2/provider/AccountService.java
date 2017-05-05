@@ -61,7 +61,7 @@ public class AccountService {
     @Produces("application/json")
     @Path("/accountExists/{username}")
     public String accountExists(@PathParam("username") String username) throws JSONException {
-        JSONObject result = new JSONObject();
+        final JSONObject result = new JSONObject();
         result.put("accountExists", DbUtils.getAccount(username) != null);
         return result.toString();
     }
@@ -72,14 +72,14 @@ public class AccountService {
     @Path("/createAccount")
     public Response createAccount(String account) throws JSONException {
         try {
-            JSONObject accountJson = new JSONObject(account);
-            String username = accountJson.getString("username");
+            final JSONObject accountJson = new JSONObject(account);
+            final String username = accountJson.getString("username");
 
             if (DbUtils.getAccount(username) != null) {
                 return new ErrorResponse("Username taken").build();
             }
 
-            String email = accountJson.getString("email");
+            final String email = accountJson.getString("email");
 
             if (!Utils.validEmail(email)) {
                 return new ErrorResponse("Invalid email address").build();
@@ -98,7 +98,7 @@ public class AccountService {
     }
 
     public static Account createAccountStatic(String username, String password, String firstName, String lastName, String email) {
-        Account account = new Account(username, username);
+        final Account account = new Account(username, username);
         account.setPasswordHash(hash(password));
         account.setName(firstName + " " + lastName);
         account.setFamilyName(lastName);
@@ -113,11 +113,11 @@ public class AccountService {
     @Produces("application/json")
     @Path("/logout")
     public Response logout(@Context HttpServletRequest request) throws JSONException {
-        JSONObject result = new JSONObject();
+        final JSONObject result = new JSONObject();
         result.put("type", "AuthResponse");
         result.put("logout" , true);
 
-        String token = Utils.getTokenFromCookies(request.getCookies());
+        final String token = Utils.getTokenFromCookies(request.getCookies());
         if (token != null) {
             ObjectifyService.ofy().delete().key(Key.create(AccessToken.class, token)).now();
             result.put("accessTokenDeleted" , token);
@@ -135,18 +135,18 @@ public class AccountService {
     @Produces("application/json")
     @Path("/authenticate")
     public Response authenticate(String account) throws JSONException, OAuthSystemException {
-        JSONObject result = new JSONObject();
+        final JSONObject result = new JSONObject();
         result.put("type", "AuthResponse");
 
-        JSONObject accountJson = new JSONObject(account);
-        Account accountOfi = DbUtils.getAccount(accountJson.getString("username"));
+        final JSONObject accountJson = new JSONObject(account);
+        final Account accountOfi = DbUtils.getAccount(accountJson.getString("username"));
         if (accountOfi == null) {
             result.put("error", "username does not exist ");
             result.put("userName", false);
 
             return Response.ok(result.toString()).build();
         }
-        String password = accountJson.getString("password");
+        final String password = accountJson.getString("password");
         if (password == null || !hash(password).equals(accountOfi.getPasswordHash())) {
             result.put("error", "password incorrect");
             result.put("password", false);
@@ -154,8 +154,8 @@ public class AccountService {
             return Response.ok(result.toString()).build();
         }
 
-        String accessToken = new MD5Generator().generateValue();
-        AccessToken at = new AccessToken(accessToken, accountOfi);
+        final String accessToken = new MD5Generator().generateValue();
+        final AccessToken at = new AccessToken(accessToken, accountOfi);
         ObjectifyService.ofy().save().entity(at).now();
 
         result.put("token", accessToken);
@@ -172,32 +172,31 @@ public class AccountService {
                                    @FormParam("originalPage") String originalPage) throws URISyntaxException {
 
         try {
-            Account account = DbUtils.getAccount(username);
+            final Account account = DbUtils.getAccount(username);
 
             if (account == null) {
-                URI location = new URI("../" + originalPage + "?incorrectUsername");
+                final URI location = new URI("../" + originalPage + "?incorrectUsername");
                 return Response.temporaryRedirect(location).build();
             }
 
             if (Utils.isEmpty(password) || !hash(password).equals(account.getPasswordHash())) {
-                URI location = new URI("../" + originalPage + "?incorrectPassword");
+                final URI location = new URI("../" + originalPage + "?incorrectPassword");
                 return Response.temporaryRedirect(location).build();
             }
 
-            OAuthIssuer oauthIssuer = new OAuthIssuerImpl(new MD5Generator());
+            final OAuthIssuer oauthIssuer = new OAuthIssuerImpl(new MD5Generator());
 
-            AccessToken at = new AccessToken(oauthIssuer.accessToken(), account);
+            final AccessToken at = new AccessToken(oauthIssuer.accessToken(), account);
             ObjectifyService.ofy().save().entity(at).now();
 
-            String code = oauthIssuer.authorizationCode();
-            CodeToAccount cta = new CodeToAccount(code, account);
+            final String code = oauthIssuer.authorizationCode();
+            final CodeToAccount cta = new CodeToAccount(code, account);
             ObjectifyService.ofy().save().entity(cta).now();
 
-            URI location = new URI("http://streetlearn.appspot.com/oauth/wespot?code=" + code);
-
+            final URI location = new URI("http://streetlearn.appspot.com/oauth/wespot?code=" + code);
             return Response.temporaryRedirect(location).build();
         } catch (OAuthSystemException|NullPointerException e) {
-            URI location = new URI("../" + originalPage + "?incorrectData");
+            final URI location = new URI("../" + originalPage + "?incorrectData");
             return Response.temporaryRedirect(location).build();
         }
     }
@@ -219,9 +218,9 @@ public class AccountService {
 
     public static String hash(String pw) {
         try {
-            MessageDigest md = MessageDigest.getInstance("SHA-256");
-            byte[] mdbytes = md.digest(pw.getBytes());
-            StringBuffer sb = new StringBuffer();
+            final MessageDigest md = MessageDigest.getInstance("SHA-256");
+            final byte[] mdbytes = md.digest(pw.getBytes());
+            final StringBuffer sb = new StringBuffer();
             for (int i = 0; i < mdbytes.length; i++) {
                 sb.append(Integer.toString((mdbytes[i] & 0xff) + 0x100, 16).substring(1));
             }
@@ -234,16 +233,16 @@ public class AccountService {
     }
 
     public static AccountReset resetAccount(Account account) throws OAuthSystemException {
-        String code = new MD5Generator().generateValue();
+        final String code = new MD5Generator().generateValue();
 
-        AccountReset resetEntity = new AccountReset(account.getIdentifier(), code);
+        final AccountReset resetEntity = new AccountReset(account.getIdentifier(), code);
         ObjectifyService.ofy().save().entity(resetEntity).now();
         return resetEntity;
     }
 
     public static void resetPassword(String resetId, String password) {
-        AccountReset ar = DbUtils.getAccountReset(resetId);
-        Account account = DbUtils.getAccount(ar.getIdentifier());
+        final AccountReset ar = DbUtils.getAccountReset(resetId);
+        final Account account = DbUtils.getAccount(ar.getIdentifier());
         account.setPasswordHash(hash(password));
         ObjectifyService.ofy().save().entity(account);
         ObjectifyService.ofy().delete().entity(ar);

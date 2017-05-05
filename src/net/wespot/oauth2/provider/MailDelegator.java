@@ -34,10 +34,10 @@ import java.util.Properties;
  */
 public class MailDelegator {
     public void changePassword(String toMail, String resetId) {
-        String from = "no-reply@" + SystemProperty.applicationId.get() + ".appspotmail.com";
+        final String from = "no-reply@" + SystemProperty.applicationId.get() + ".appspotmail.com";
 
-        Session session = Session.getDefaultInstance(new Properties(), null);
-        String link = "http://" + SystemProperty.applicationId.get() + ".appspot.com/ResetPassword.jsp?resetId=" + resetId;
+        final Session session = Session.getDefaultInstance(new Properties(), null);
+        final String link = "http://" + SystemProperty.applicationId.get() + ".appspot.com/ResetPassword.jsp?resetId=" + resetId;
 
         String msgBody = "<html><body>";
         msgBody += "Hello,<br>";
@@ -61,7 +61,7 @@ public class MailDelegator {
         msgBody += "</body></html>";
         System.out.println(msgBody);
         try {
-            Message msg = new MimeMessage(session);
+            final Message msg = new MimeMessage(session);
             msg.setFrom(new InternetAddress(from, "weSPOT account service"));
             msg.addRecipient(Message.RecipientType.TO, new InternetAddress(toMail));
             msg.addRecipient(Message.RecipientType.BCC, new InternetAddress(from));

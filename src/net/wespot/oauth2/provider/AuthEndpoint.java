@@ -18,6 +18,7 @@ import org.apache.amber.oauth2.common.OAuth;
 import org.apache.amber.oauth2.as.issuer.MD5Generator;
 import org.apache.amber.oauth2.as.request.OAuthAuthzRequest;
 import org.apache.amber.oauth2.as.response.OAuthASResponse;
+import org.apache.amber.oauth2.as.response.OAuthASResponse.OAuthAuthorizationResponseBuilder;
 import org.apache.amber.oauth2.common.exception.OAuthProblemException;
 import org.apache.amber.oauth2.common.exception.OAuthSystemException;
 import org.apache.amber.oauth2.common.message.OAuthResponse;
@@ -77,14 +78,14 @@ public class AuthEndpoint implements Endpoint {
                     .setParam(OAuth.OAUTH_RESPONSE_TYPE, request.getParameter(OAuth.OAUTH_RESPONSE_TYPE))
                     .setParam(OAuth.OAUTH_SCOPE, request.getParameter(OAuth.OAUTH_SCOPE))
                     .buildQueryMessage();
-            URI loginPageUrl = new URI(loginPageResponse.getLocationUri());
-            Response invalidCookieResponse = Response.status(loginPageResponse.getResponseStatus()).location(loginPageUrl).build();
+            final URI loginPageUrl = new URI(loginPageResponse.getLocationUri());
+            final Response invalidCookieResponse = Response.status(loginPageResponse.getResponseStatus()).location(loginPageUrl).build();
 
-            String token = Utils.getTokenFromCookies(request.getCookies());
+            final String token = Utils.getTokenFromCookies(request.getCookies());
 
             if (token == null) return invalidCookieResponse;
 
-            AccessToken accessToken = DbUtils.getAccessToken(token);
+            final AccessToken accessToken = DbUtils.getAccessToken(token);
             if (!accessToken.getAccount().isLoaded()) {
                 ObjectifyService.ofy().load().key(accessToken.getAccount().getKey()).now();
             }
@@ -92,29 +93,28 @@ public class AuthEndpoint implements Endpoint {
                 return invalidCookieResponse;
             }
 
-            String clientId = request.getParameter(OAuth.OAUTH_CLIENT_ID);
+            final String clientId = request.getParameter(OAuth.OAUTH_CLIENT_ID);
 
-            ResponseBuilder badRequest = Response.status(Status.BAD_REQUEST);
+            final ResponseBuilder badRequest = Response.status(Status.BAD_REQUEST);
             if (clientId == null) {
                 return badRequest.entity("OAuth client id needs to be provided by client!").build();
             } else if (clientId != null && DbUtils.getApplication(clientId) == null) {
                 return badRequest.entity("client_id " + clientId + " is not a valid client id!").build();
             }
 
-            OAuthAuthzRequest oauthRequest = new OAuthAuthzRequest(request);
+            final OAuthAuthzRequest oauthRequest = new OAuthAuthzRequest(request);
 
             // Build response according to response_type
-            String responseType = oauthRequest.getParam(OAuth.OAUTH_RESPONSE_TYPE);
-
-            OAuthASResponse.OAuthAuthorizationResponseBuilder builder = OAuthASResponse
+            final String responseType = oauthRequest.getParam(OAuth.OAUTH_RESPONSE_TYPE);
+            final OAuthAuthorizationResponseBuilder builder = OAuthASResponse
                     .authorizationResponse(request, HttpServletResponse.SC_FOUND);
 
-            String code = new MD5Generator().generateValue();
+            final String code = new MD5Generator().generateValue();
 
             if (responseType.equals(ResponseType.CODE.toString())) {
                   builder.setCode(code);
 
-                  CodeToAccount cta = new CodeToAccount(code, accessToken.getAccount().getValue());
+                  final CodeToAccount cta = new CodeToAccount(code, accessToken.getAccount().getValue());
                   ObjectifyService.ofy().save().entity(cta).now();
             }
 
@@ -123,15 +123,14 @@ public class AuthEndpoint implements Endpoint {
                   builder.setExpiresIn("3600");
             }
 
-            String redirectURI = oauthRequest.getParam(OAuth.OAUTH_REDIRECT_URI);
+            final String redirectURI = oauthRequest.getParam(OAuth.OAUTH_REDIRECT_URI);
             final OAuthResponse response = builder.location(redirectURI).buildQueryMessage();
-            URI url = new URI(response.getLocationUri());
+            final URI url = new URI(response.getLocationUri());
 
             return Response.status(response.getResponseStatus()).location(url).build();
         } catch (OAuthProblemException e) {
             final ResponseBuilder responseBuilder = Response.status(HttpServletResponse.SC_FOUND);
-
-            String redirectUri = e.getRedirectUri();
+            final String redirectUri = e.getRedirectUri();
 
             if (Utils.isEmpty(redirectUri)) {
                 return responseBuilder.entity("OAuth callback url needs to be provided by client!").build();

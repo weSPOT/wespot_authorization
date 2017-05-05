@@ -23,8 +23,8 @@ public final class Utils {
     }
 
     public static boolean validEmail(String email) {
-        Pattern pattern = Pattern.compile(EMAIL_PATTERN);
-        Matcher matcher = pattern.matcher(email);
+        final Pattern pattern = Pattern.compile(EMAIL_PATTERN);
+        final Matcher matcher = pattern.matcher(email);
         return matcher.matches();
     }
 }

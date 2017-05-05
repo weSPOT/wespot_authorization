@@ -52,11 +52,11 @@ public class ResourceQueryEndpoint {
     public Response get(@Context HttpServletRequest request) throws OAuthSystemException, JSONException {
         try {
             // Extract access token from request via OAuthAccessResourceRequest
-            String accessToken = new OAuthAccessResourceRequest(request, ParameterStyle.QUERY)
+            final String accessToken = new OAuthAccessResourceRequest(request, ParameterStyle.QUERY)
                     .getAccessToken();
 
-            AccessToken at = DbUtils.getAccessToken(accessToken);
-            Account account = ObjectifyService.ofy().load().ref(at.getAccount()).now();
+            final AccessToken at = DbUtils.getAccessToken(accessToken);
+            final Account account = ObjectifyService.ofy().load().ref(at.getAccount()).now();
             return Response.ok(account.toJson()).build();
         } catch (OAuthProblemException|NullPointerException e) {
             return new ErrorResponse("Invalid access token").build();

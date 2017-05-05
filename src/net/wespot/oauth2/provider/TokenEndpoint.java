@@ -62,10 +62,10 @@ public class TokenEndpoint implements Endpoint {
     @Consumes("application/x-www-form-urlencoded")
     @Produces("application/json")
     public Response authorize(@Context HttpServletRequest request) throws OAuthSystemException, JSONException {
-        String clientId = request.getParameter(OAuth.OAUTH_CLIENT_ID);
-        String clientSecret = request.getParameter(OAuth.OAUTH_CLIENT_SECRET);
-        String code = request.getParameter(OAuth.OAUTH_CODE);
-        String grantType = request.getParameter(OAuth.OAUTH_GRANT_TYPE);
+        final String clientId = request.getParameter(OAuth.OAUTH_CLIENT_ID);
+        final String clientSecret = request.getParameter(OAuth.OAUTH_CLIENT_SECRET);
+        final String code = request.getParameter(OAuth.OAUTH_CODE);
+        final String grantType = request.getParameter(OAuth.OAUTH_GRANT_TYPE);
 
         final ResponseBuilder badRequest = Response.status(Status.BAD_REQUEST);
 
@@ -73,7 +73,7 @@ public class TokenEndpoint implements Endpoint {
             return new ErrorResponse("Missing field!").build();
         }
 
-        ApplicationRegistry application = DbUtils.getApplication(clientId);
+        final ApplicationRegistry application = DbUtils.getApplication(clientId);
         if (application == null) {
             return new ErrorResponse("client_id " + clientId + " is not a valid client id!").build();
         }
@@ -82,17 +82,17 @@ public class TokenEndpoint implements Endpoint {
             return new ErrorResponse("client_secret does not match client_id").build();
         }
 
-        CodeToAccount accountCode = DbUtils.getCodeToAccount(code);
+        final CodeToAccount accountCode = DbUtils.getCodeToAccount(code);
         Account account = null;
         if (!accountCode.getAccount().isLoaded()) {
             account = ObjectifyService.ofy().load().key(accountCode.getAccount().getKey()).now();
         }
 
-        String accessToken = new MD5Generator().generateValue();
-        AccessToken at = new AccessToken(accessToken, account);
+        final String accessToken = new MD5Generator().generateValue();
+        final AccessToken at = new AccessToken(accessToken, account);
         ObjectifyService.ofy().save().entity(at).now();
 
-        JSONObject result = new JSONObject()
+        final JSONObject result = new JSONObject()
                 .put("access_token", accessToken)
                 .put("expires_in", 3600);
 

@@ -44,14 +44,14 @@ public class ApplicationRegistryService {
     @Path("/createApplication")
     public Response createApplication(String application) throws JSONException {
         try {
-            JSONObject applicationJson = new JSONObject(application);
-            String clientId = applicationJson.getString("clientId");
+            final JSONObject applicationJson = new JSONObject(application);
+            final String clientId = applicationJson.getString("clientId");
 
             if (DbUtils.getApplication(clientId) != null) {
                 return new ErrorResponse("Client id is already taken").build();
             }
 
-            ApplicationRegistry app = new ApplicationRegistry();
+            final ApplicationRegistry app = new ApplicationRegistry();
             app.setRedirectUri(applicationJson.getString("redirectUri"));
             app.setClientSecret(applicationJson.getString("sharedSecret"));
             app.setClientId(clientId);
