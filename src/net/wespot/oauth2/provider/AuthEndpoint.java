@@ -5,8 +5,6 @@ import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
-import javax.ws.rs.core.Response.ResponseBuilder;
 
 import com.googlecode.objectify.ObjectifyService;
 import net.wespot.db.AccessToken;
@@ -16,19 +14,19 @@ import net.wespot.db.CodeToAccount;
 import org.apache.amber.oauth2.common.OAuth;
 
 import org.apache.amber.oauth2.as.issuer.MD5Generator;
-import org.apache.amber.oauth2.as.request.OAuthAuthzRequest;
 import org.apache.amber.oauth2.as.response.OAuthASResponse;
 import org.apache.amber.oauth2.as.response.OAuthASResponse.OAuthAuthorizationResponseBuilder;
-import org.apache.amber.oauth2.common.exception.OAuthProblemException;
 import org.apache.amber.oauth2.common.exception.OAuthSystemException;
 import org.apache.amber.oauth2.common.message.OAuthResponse;
 import org.apache.amber.oauth2.common.message.types.ResponseType;
+import org.codehaus.jettison.json.JSONException;
 
 import java.net.URI;
 import java.net.URISyntaxException;
 
 import net.wespot.utils.Utils;
 import net.wespot.utils.DbUtils;
+import net.wespot.utils.ErrorResponse;
 
 /**
  * ****************************************************************************
@@ -62,86 +60,72 @@ public class AuthEndpoint implements Endpoint {
 
     @GET
     public Response authorizeGet(@Context HttpServletRequest request)
-            throws URISyntaxException, OAuthSystemException {
+            throws URISyntaxException, OAuthSystemException, JSONException {
         return authorize(request);
     }
 
     @POST
     public Response authorize(@Context HttpServletRequest request)
-            throws URISyntaxException, OAuthSystemException {
-        try {
-            final OAuthResponse loginPageResponse = OAuthASResponse
-                    .authorizationResponse(request, HttpServletResponse.SC_FOUND)
-                    .location("../Login.html")
-                    .setParam(OAuth.OAUTH_REDIRECT_URI, request.getParameter(OAuth.OAUTH_REDIRECT_URI))
-                    .setParam(OAuth.OAUTH_CLIENT_ID, request.getParameter(OAuth.OAUTH_CLIENT_ID))
-                    .setParam(OAuth.OAUTH_RESPONSE_TYPE, request.getParameter(OAuth.OAUTH_RESPONSE_TYPE))
-                    .setParam(OAuth.OAUTH_SCOPE, request.getParameter(OAuth.OAUTH_SCOPE))
-                    .buildQueryMessage();
-            final URI loginPageUrl = new URI(loginPageResponse.getLocationUri());
-            final Response invalidCookieResponse = Response.status(loginPageResponse.getResponseStatus()).location(loginPageUrl).build();
+            throws URISyntaxException, OAuthSystemException, JSONException {
 
-            final String token = Utils.getTokenFromCookies(request.getCookies());
+        final String clientId = request.getParameter(OAuth.OAUTH_CLIENT_ID);
+        final String responseType = request.getParameter(OAuth.OAUTH_RESPONSE_TYPE);
+        final String redirectUri = request.getParameter(OAuth.OAUTH_REDIRECT_URI);
 
-            if (token == null) return invalidCookieResponse;
+        final OAuthResponse loginPageResponse = OAuthASResponse
+                .authorizationResponse(request, HttpServletResponse.SC_FOUND)
+                .location("../Login.html")
+                .setParam(OAuth.OAUTH_REDIRECT_URI, redirectUri)
+                .setParam(OAuth.OAUTH_CLIENT_ID, clientId)
+                .setParam(OAuth.OAUTH_RESPONSE_TYPE, responseType)
+                .buildQueryMessage();
+        final URI loginPageUrl = new URI(loginPageResponse.getLocationUri());
+        final Response invalidCookieResponse = Response.status(loginPageResponse.getResponseStatus()).location(loginPageUrl).build();
 
-            final AccessToken accessToken = DbUtils.getAccessToken(token);
-            if (!accessToken.getAccount().isLoaded()) {
-                ObjectifyService.ofy().load().key(accessToken.getAccount().getKey()).now();
-            }
-            if (accessToken.getAccount().getValue().getIdentifier() == null) {
-                return invalidCookieResponse;
-            }
+        final String token = Utils.getTokenFromCookies(request.getCookies());
+        if (token == null) return invalidCookieResponse;
 
-            final String clientId = request.getParameter(OAuth.OAUTH_CLIENT_ID);
-
-            final ResponseBuilder badRequest = Response.status(Status.BAD_REQUEST);
-            if (clientId == null) {
-                return badRequest.entity("OAuth client id needs to be provided by client!").build();
-            } else if (clientId != null && DbUtils.getApplication(clientId) == null) {
-                return badRequest.entity("client_id " + clientId + " is not a valid client id!").build();
-            }
-
-            final OAuthAuthzRequest oauthRequest = new OAuthAuthzRequest(request);
-
-            // Build response according to response_type
-            final String responseType = oauthRequest.getParam(OAuth.OAUTH_RESPONSE_TYPE);
-            final OAuthAuthorizationResponseBuilder builder = OAuthASResponse
-                    .authorizationResponse(request, HttpServletResponse.SC_FOUND);
-
-            final String code = new MD5Generator().generateValue();
-
-            if (responseType.equals(ResponseType.CODE.toString())) {
-                  builder.setCode(code);
-
-                  final CodeToAccount cta = new CodeToAccount(code, accessToken.getAccount().getValue());
-                  ObjectifyService.ofy().save().entity(cta).now();
-            }
-
-            if (responseType.equals(ResponseType.TOKEN.toString())) {
-                  builder.setAccessToken(code);
-                  builder.setExpiresIn("3600");
-            }
-
-            final String redirectURI = oauthRequest.getParam(OAuth.OAUTH_REDIRECT_URI);
-            final OAuthResponse response = builder.location(redirectURI).buildQueryMessage();
-            final URI url = new URI(response.getLocationUri());
-
-            return Response.status(response.getResponseStatus()).location(url).build();
-        } catch (OAuthProblemException e) {
-            final ResponseBuilder responseBuilder = Response.status(HttpServletResponse.SC_FOUND);
-            final String redirectUri = e.getRedirectUri();
-
-            if (Utils.isEmpty(redirectUri)) {
-                return responseBuilder.entity("OAuth callback url needs to be provided by client!").build();
-            }
-
-            final OAuthResponse response = OAuthASResponse.errorResponse(HttpServletResponse.SC_FOUND)
-                    .error(e)
-                    .location(redirectUri)
-                    .buildQueryMessage();
-            final URI location = new URI(response.getLocationUri());
-            return responseBuilder.location(location).build();
+        final AccessToken accessToken = DbUtils.getAccessToken(token);
+        if (!accessToken.getAccount().isLoaded()) {
+            ObjectifyService.ofy().load().key(accessToken.getAccount().getKey()).now();
         }
+        if (accessToken.getAccount().getValue().getIdentifier() == null) {
+            return invalidCookieResponse;
+        }
+
+        if (clientId == null) {
+            return new ErrorResponse("OAuth client id needs to be provided by client!").build();
+        } else if (clientId != null && DbUtils.getApplication(clientId) == null) {
+            return new ErrorResponse("client_id " + clientId + " is not a valid client id!").build();
+        }
+
+        if (redirectUri == null || !Utils.validUri(redirectUri)) {
+            return new ErrorResponse("Valid redirect uri needs to be provided by client!").build();
+        }
+
+        if (responseType == null || (!responseType.equals(ResponseType.TOKEN.toString()) && !responseType.equals(ResponseType.CODE.toString()))) {
+            return new ErrorResponse("Invalid response type").build();
+        }
+
+        // Build response according to response_type
+        final OAuthAuthorizationResponseBuilder builder = OAuthASResponse
+                .authorizationResponse(request, HttpServletResponse.SC_FOUND);
+
+        final String code = new MD5Generator().generateValue();
+
+        if (responseType.equals(ResponseType.CODE.toString())) {
+            builder.setCode(code);
+
+            final CodeToAccount cta = new CodeToAccount(code, accessToken.getAccount().getValue());
+            ObjectifyService.ofy().save().entity(cta).now();
+        } else {
+            builder.setAccessToken(code);
+            builder.setExpiresIn("3600");
+        }
+
+        final OAuthResponse response = builder.location(redirectUri).buildQueryMessage();
+        final URI url = new URI(response.getLocationUri());
+
+        return Response.status(response.getResponseStatus()).location(url).build();
     }
 }
