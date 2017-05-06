@@ -18,7 +18,7 @@
         <load-on-startup>1</load-on-startup>
     </servlet>
 
-<!--    <servlet>
+    <!--<servlet>
         <servlet-name>uploadCSV</servlet-name>
         <servlet-class>net.wespot.oauth2.provider.UploadUsers</servlet-class>
     </servlet>-->
@@ -28,11 +28,10 @@
         <url-pattern>/oauth/*</url-pattern>
     </servlet-mapping>
 
-<!--    <servlet-mapping>
+    <!--<servlet-mapping>
         <servlet-name>uploadCSV</servlet-name>
         <url-pattern>/uploadCSV</url-pattern>
     </servlet-mapping>-->
-
 
     <filter>
         <filter-name>ObjectifyFilter</filter-name>

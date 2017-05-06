@@ -47,6 +47,7 @@ select {
   padding: 24px;
   background-color: #FFFFFF;
   box-shadow: 0 2px 60px 0 rgba(0, 0, 0, .17);
+  box-sizing: border-box;
 }
 
 #content .title {
@@ -132,4 +133,18 @@ select {
 
 #check-user .submit-btn:focus {
   border-bottom: 0;
+}
+
+@media screen and (max-width: 500px) {
+  #background {
+    display: none;
+  }
+
+  #content {
+    top: 0;
+    left: 0;
+    width: 100%;
+    min-height: 100%;
+    transform: none;
+  }
 }
