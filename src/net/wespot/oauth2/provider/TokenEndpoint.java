@@ -67,8 +67,6 @@ public class TokenEndpoint implements Endpoint {
         final String clientSecret = request.getParameter(OAuth.OAUTH_CLIENT_SECRET);
         final String code = request.getParameter(OAuth.OAUTH_CODE);
 
-        final ResponseBuilder badRequest = Response.status(Status.BAD_REQUEST);
-
         if (Utils.isEmpty(clientId) || Utils.isEmpty(clientSecret) || Utils.isEmpty(code)) {
             return new ErrorResponse("Missing field!").build();
         }
@@ -82,15 +80,18 @@ public class TokenEndpoint implements Endpoint {
             return new ErrorResponse("client_secret does not match client_id").build();
         }
 
-        final CodeToAccount accountCode = DbUtils.getCodeToAccount(code);
-        Account account = null;
-        if (!accountCode.getAccount().isLoaded()) {
-            account = ObjectifyService.ofy().load().key(accountCode.getAccount().getKey()).now();
-        }
-
         final String accessToken = new MD5Generator().generateValue();
-        final AccessToken at = new AccessToken(accessToken, account);
-        ObjectifyService.ofy().save().entity(at).now();
+
+        final CodeToAccount accountCode = DbUtils.getCodeToAccount(code);
+        if (accountCode != null) {
+            Account account = null;
+            if (!accountCode.getAccount().isLoaded()) {
+                account = ObjectifyService.ofy().load().key(accountCode.getAccount().getKey()).now();
+            }
+
+            final AccessToken at = new AccessToken(accessToken, account);
+            ObjectifyService.ofy().save().entity(at).now();
+        }
 
         final JSONObject result = new JSONObject()
                 .put("access_token", accessToken)

@@ -18,6 +18,7 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.NewCookie;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.MediaType;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.security.MessageDigest;
@@ -58,7 +59,7 @@ public class AccountService {
     }
 
     @GET
-    @Produces("application/json")
+    @Produces(MediaType.APPLICATION_JSON)
     @Path("/accountExists/{username}")
     public String accountExists(@PathParam("username") String username) throws JSONException {
         final JSONObject result = new JSONObject();
@@ -67,8 +68,8 @@ public class AccountService {
     }
 
     @POST
-    @Consumes("application/json")
-    @Produces("application/json")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
     @Path("/createAccount")
     public Response createAccount(String account) throws JSONException {
         try {
@@ -110,7 +111,7 @@ public class AccountService {
     }
 
     @GET
-    @Produces("application/json")
+    @Produces(MediaType.APPLICATION_JSON)
     @Path("/logout")
     public Response logout(@Context HttpServletRequest request) throws JSONException {
         final JSONObject result = new JSONObject();
@@ -132,7 +133,8 @@ public class AccountService {
     }
 
     @POST
-    @Produces("application/json")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
     @Path("/authenticate")
     public Response authenticate(String account) throws JSONException, OAuthSystemException {
         final JSONObject result = new JSONObject();
@@ -166,6 +168,7 @@ public class AccountService {
     }
 
     @POST
+    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @Path("/authenticateFw")
     public Response authenticateFw(@FormParam("username") String username,
                                    @FormParam("password") String password,
@@ -202,6 +205,7 @@ public class AccountService {
     }
 
     @POST
+    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @Path("/authenticateFwAndroid")
     public Response authenticateFwAndroid(@FormParam("school") Long school,
                                           @FormParam("username") String username,

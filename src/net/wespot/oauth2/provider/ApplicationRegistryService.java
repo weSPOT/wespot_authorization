@@ -7,6 +7,7 @@ import org.codehaus.jettison.json.JSONObject;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.MediaType;
 
 import net.wespot.utils.DbUtils;
 import net.wespot.utils.ErrorResponse;
@@ -39,8 +40,8 @@ public class ApplicationRegistryService {
     }
 
     @POST
-    @Consumes("application/json")
-    @Produces("application/json")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
     @Path("/createApplication")
     public Response createApplication(String application) throws JSONException {
         try {

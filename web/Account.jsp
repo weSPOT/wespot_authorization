@@ -25,12 +25,12 @@
 
     List<String> incorrectFields = new ArrayList<String>();
 
-    if (username != null && "".equals(username)) incorrectFields.add("username");
-    if (firstname != null && "".equals(firstname)) incorrectFields.add("firstname");
-    if (lastname != null && "".equals(lastname)) incorrectFields.add("lastname");
-    if (email != null && "".equals(email)) incorrectFields.add("email");
-    if (password != null && "".equals(password)) incorrectFields.add("password");
-    if (passwordagain != null && "".equals(passwordagain)) incorrectFields.add("passwordagain");
+    if (username != null && "".equals(username.trim())) incorrectFields.add("username");
+    if (firstname != null && "".equals(firstname.trim())) incorrectFields.add("firstname");
+    if (lastname != null && "".equals(lastname.trim())) incorrectFields.add("lastname");
+    if (email != null && "".equals(email.trim())) incorrectFields.add("email");
+    if (password != null && "".equals(password.trim())) incorrectFields.add("password");
+    if (passwordagain != null && "".equals(passwordagain.trim())) incorrectFields.add("passwordagain");
 
     boolean nameExists = false;
     if (username != null && !"".equals(username) && new AccountService().accountExists(username).contains("true")) {
