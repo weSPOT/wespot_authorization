@@ -5,6 +5,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.MediaType;
 
 import com.googlecode.objectify.ObjectifyService;
 import net.wespot.db.AccessToken;
@@ -59,12 +60,16 @@ public class AuthEndpoint implements Endpoint {
     }
 
     @GET
+    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+    @Produces(MediaType.APPLICATION_JSON)
     public Response authorizeGet(@Context HttpServletRequest request)
             throws URISyntaxException, OAuthSystemException, JSONException {
         return authorize(request);
     }
 
     @POST
+    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+    @Produces(MediaType.APPLICATION_JSON)
     public Response authorize(@Context HttpServletRequest request)
             throws URISyntaxException, OAuthSystemException, JSONException {
 
@@ -100,7 +105,7 @@ public class AuthEndpoint implements Endpoint {
         }
 
         if (redirectUri == null || !Utils.validUri(redirectUri)) {
-            return new ErrorResponse("Valid redirect uri needs to be provided by client!").build();
+            return new ErrorResponse("Invalid redirect uri").build();
         }
 
         if (responseType == null || (!responseType.equals(ResponseType.TOKEN.toString()) && !responseType.equals(ResponseType.CODE.toString()))) {

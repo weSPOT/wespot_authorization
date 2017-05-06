@@ -6,6 +6,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.Response.ResponseBuilder;
+import javax.ws.rs.core.MediaType;
 
 import com.googlecode.objectify.ObjectifyService;
 import net.wespot.db.AccessToken;
@@ -52,15 +53,15 @@ public class TokenEndpoint implements Endpoint {
     }
 
     @GET
-    @Consumes("application/x-www-form-urlencoded")
-    @Produces("application/json")
+    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+    @Produces(MediaType.APPLICATION_JSON)
     public Response authorizeGet(@Context HttpServletRequest request) throws OAuthSystemException, JSONException {
         return authorize(request);
     }
 
     @POST
-    @Consumes("application/x-www-form-urlencoded")
-    @Produces("application/json")
+    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+    @Produces(MediaType.APPLICATION_JSON)
     public Response authorize(@Context HttpServletRequest request) throws OAuthSystemException, JSONException {
         final String clientId = request.getParameter(OAuth.OAUTH_CLIENT_ID);
         final String clientSecret = request.getParameter(OAuth.OAUTH_CLIENT_SECRET);

@@ -32,10 +32,10 @@ public final class Utils {
 
     public static boolean validUri(String uriString) {
         try {
-          final URI uri = new URI(uriString);
-          return true;
+            final URI uri = new URI(uriString);
+            return true;
         } catch(URISyntaxException e) {
-          return false;
+            return false;
         }
     }
 }
