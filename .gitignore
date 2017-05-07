@@ -3,3 +3,5 @@ Oauth2ServerProvider.iml
 src/net/wespot/auth2/provider/SchoolService.java
 src/net/wespot/oauth2/provider/UploadUsers.java
 web/uploadCSV.html
+.DS_Store
+/.idea/workspace.xml

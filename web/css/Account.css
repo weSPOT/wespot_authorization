@@ -1,0 +1,13 @@
+#content {
+  top: 50px;
+  transform: translateX(-50%);
+  margin-bottom: 50px;
+}
+
+@media screen and (max-width: 500px) {
+  #content {
+    top: 0;
+    transform: none;
+    margin-bottom: 0;
+  }
+}

@@ -11,12 +11,10 @@ import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 import java.util.Properties;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * ****************************************************************************
- * Copyright (C) 2013 Open Universiteit Nederland
+ * Copyright (C) 2013-2017 Open Universiteit Nederland
  * <p/>
  * This library is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -31,42 +29,15 @@ import java.util.logging.Logger;
  * You should have received a copy of the GNU Lesser General Public License
  * along with this library.  If not, see <http://www.gnu.org/licenses/>.
  * <p/>
- * Contributors: Stefaan Ternier
+ * Contributors: Stefaan Ternier, Rafael Klaessen
  * ****************************************************************************
  */
 public class MailDelegator {
-
-    private static final Logger logger = Logger.getLogger(MailDelegator.class.getName());
-
-//    public static void sendMail(String from, String fromName, String toMail, String subject, String msgBody) {
-//        String from = "no-reply@" + SystemProperty.applicationId.get() + ".appspotmail.com";
-//        Properties props = new Properties();
-//        Session session = Session.getDefaultInstance(props, null);
-//        try {
-//            Message msg = new MimeMessage(session);
-//            msg.setFrom(new InternetAddress(from, fromName));
-//            msg.addRecipient(Message.RecipientType.TO, new InternetAddress(toMail));
-//            msg.setSubject(subject);
-//
-//            final MimeBodyPart htmlPart = new MimeBodyPart();
-//            htmlPart.setContent(msgBody, "text/html");
-//            final Multipart mp = new MimeMultipart();
-//            mp.addBodyPart(htmlPart);
-//
-//            msg.setContent(mp);
-//            Transport.send(msg);
-//
-//        } catch (Exception e) {
-//            logger.log(Level.SEVERE, e.getMessage(), e);
-//        }
-//    }
-
     public void changePassword(String toMail, String resetId) {
-        String from = "no-reply@" + SystemProperty.applicationId.get() + ".appspotmail.com";
+        final String from = "no-reply@" + SystemProperty.applicationId.get() + ".appspotmail.com";
 
-        Properties props = new Properties();
-        Session session = Session.getDefaultInstance(props, null);
-        String link = "http://"+SystemProperty.applicationId.get()+".appspot.com/ResetPassword.jsp?resetId="+resetId;
+        final Session session = Session.getDefaultInstance(new Properties(), null);
+        final String link = "http://" + SystemProperty.applicationId.get() + ".appspot.com/ResetPassword.jsp?resetId=" + resetId;
 
         String msgBody = "<html><body>";
         msgBody += "Hello,<br>";
@@ -80,7 +51,7 @@ public class MailDelegator {
         msgBody += "Click the following link to set a new password.";
         msgBody += "</p>";
         msgBody += "<p>";
-        msgBody += "<a href=\""+link+"\">"+link+"</a>";
+        msgBody += "<a href=\"" + link + "\">" + link + "</a>";
         msgBody += "</p>";
         msgBody += "<p>";
         msgBody += "If clicking the link doesn't work you can copy the link into your browser window or type it there directly.</p>";
@@ -90,7 +61,7 @@ public class MailDelegator {
         msgBody += "</body></html>";
         System.out.println(msgBody);
         try {
-            Message msg = new MimeMessage(session);
+            final Message msg = new MimeMessage(session);
             msg.setFrom(new InternetAddress(from, "weSPOT account service"));
             msg.addRecipient(Message.RecipientType.TO, new InternetAddress(toMail));
             msg.addRecipient(Message.RecipientType.BCC, new InternetAddress(from));
@@ -103,9 +74,8 @@ public class MailDelegator {
 
             msg.setContent(mp);
             Transport.send(msg);
-
         } catch (Exception e) {
-            logger.log(Level.SEVERE, e.getMessage(), e);
+            System.out.println(e.getMessage());
         }
     }
 }

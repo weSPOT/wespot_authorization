@@ -1,38 +1,29 @@
 package net.wespot.oauth2.provider;
 
-import javax.servlet.http.HttpServletResponse;
-
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.MediaType;
 
-import com.googlecode.objectify.Key;
 import com.googlecode.objectify.ObjectifyService;
 import net.wespot.db.AccessToken;
 import net.wespot.db.Account;
 import net.wespot.db.ApplicationRegistry;
 import net.wespot.db.CodeToAccount;
 import org.apache.amber.oauth2.as.issuer.MD5Generator;
-import org.apache.amber.oauth2.as.issuer.OAuthIssuer;
-import org.apache.amber.oauth2.as.issuer.OAuthIssuerImpl;
-import org.apache.amber.oauth2.as.request.OAuthTokenRequest;
-import org.apache.amber.oauth2.as.response.OAuthASResponse;
 import org.apache.amber.oauth2.common.OAuth;
-import org.apache.amber.oauth2.common.error.OAuthError;
-import org.apache.amber.oauth2.common.exception.OAuthProblemException;
 import org.apache.amber.oauth2.common.exception.OAuthSystemException;
-import org.apache.amber.oauth2.common.message.OAuthResponse;
-import org.apache.amber.oauth2.common.message.types.GrantType;
+import org.codehaus.jettison.json.JSONException;
+import org.codehaus.jettison.json.JSONObject;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import net.wespot.utils.Utils;
+import net.wespot.utils.DbUtils;
+import net.wespot.utils.ErrorResponse;
 
 /**
  * ****************************************************************************
- * Copyright (C) 2013 Open Universiteit Nederland
+ * Copyright (C) 2013-2017 Open Universiteit Nederland
  * <p/>
  * This library is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -47,11 +38,11 @@ import java.util.Set;
  * You should have received a copy of the GNU Lesser General Public License
  * along with this library.  If not, see <http://www.gnu.org/licenses/>.
  * <p/>
- * Contributors: Stefaan Ternier
+ * Contributors: Stefaan Ternier, Rafael Klaessen
  * ****************************************************************************
  */
 @Path("/token")
-public class TokenEndpoint {
+public class TokenEndpoint implements Endpoint {
     static {
         ObjectifyService.register(AccessToken.class);
         ObjectifyService.register(CodeToAccount.class);
@@ -59,113 +50,51 @@ public class TokenEndpoint {
         ObjectifyService.register(Account.class);
     }
 
-    @POST
-    @Consumes("application/x-www-form-urlencoded")
-    @Produces("application/json")
-    public Response authorize(@Context javax.servlet.http.HttpServletRequest request) throws OAuthSystemException {
-        System.out.println("before fetching ");
-        HashMap<String, String> hashMap = new HashMap<String, String>();
-        OAuthTokenRequest oauthRequest = null;
-        try {
-            System.out.println("before fetching ");
-
-            oauthRequest = new OAuthTokenRequest(request);
-            System.out.println("before fetching "+oauthRequest.getParam(OAuth.OAUTH_CLIENT_ID));
-            hashMap.put(OAuth.OAUTH_CLIENT_ID, oauthRequest.getParam(OAuth.OAUTH_CLIENT_ID));
-            hashMap.put(OAuth.OAUTH_CODE, oauthRequest.getParam(OAuth.OAUTH_CODE));
-            hashMap.put(OAuth.OAUTH_GRANT_TYPE, oauthRequest.getParam(OAuth.OAUTH_GRANT_TYPE));
-            hashMap.put(OAuth.OAUTH_CLIENT_SECRET, oauthRequest.getParam(OAuth.OAUTH_CLIENT_SECRET));
-            System.out.println("hashmap "+hashMap.toString());
-            System.out.println("OAUTH_CLIENT_ID "+oauthRequest.getParam(OAuth.OAUTH_CLIENT_ID));
-        } catch (OAuthProblemException e) {
-            OAuthResponse res = OAuthASResponse.errorResponse(HttpServletResponse.SC_BAD_REQUEST).error(e)
-                    .buildJSONMessage();
-            return Response.status(res.getResponseStatus()).entity(res.getBody()).build();
-        }
-
-        return authorize(hashMap);
-
-    }
-
     @GET
-    @Consumes("application/x-www-form-urlencoded")
-    @Produces("application/json")
-    public Response authorizeGet(@Context javax.servlet.http.HttpServletRequest request) throws OAuthSystemException {
-        HashMap<String, String> hashMap = new HashMap<String, String>();
-        hashMap.put(OAuth.OAUTH_CLIENT_ID, request.getParameter(OAuth.OAUTH_CLIENT_ID));
-        hashMap.put(OAuth.OAUTH_CODE, request.getParameter(OAuth.OAUTH_CODE));
-        hashMap.put(OAuth.OAUTH_GRANT_TYPE, request.getParameter(OAuth.OAUTH_GRANT_TYPE));
-        hashMap.put(OAuth.OAUTH_CLIENT_SECRET, request.getParameter(OAuth.OAUTH_CLIENT_SECRET));
-
-        Set<Map.Entry> set = request.getParameterMap().entrySet();
-        for (Map.Entry entry : set) {
-            System.out.println("entry " + entry.getKey() + " " + entry.getValue());
-        }
-        return authorize( hashMap);
+    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response authorizeGet(@Context HttpServletRequest request) throws OAuthSystemException, JSONException {
+        return authorize(request);
     }
 
+    @POST
+    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response authorize(@Context HttpServletRequest request) throws OAuthSystemException, JSONException {
+        final String clientId = request.getParameter(OAuth.OAUTH_CLIENT_ID);
+        final String clientSecret = request.getParameter(OAuth.OAUTH_CLIENT_SECRET);
+        final String code = request.getParameter(OAuth.OAUTH_CODE);
 
-    private Response authorize(HashMap<String, String> hashMap)  throws OAuthSystemException{
-        String clientId = hashMap.get(OAuth.OAUTH_CLIENT_ID);
-        String sharedSecret = "";
-        if (clientId != null) {
-
-            ApplicationRegistry application = ObjectifyService.ofy().load().key(Key.create(ApplicationRegistry.class, hashMap.get(OAuth.OAUTH_CLIENT_ID))).now();
-            if (application == null) {
-                final Response.ResponseBuilder responseBuilder = Response.status(HttpServletResponse.SC_FOUND);
-
-                throw new WebApplicationException(
-                        responseBuilder.entity("client_id " + hashMap.get(OAuth.OAUTH_CLIENT_ID) + " is not a valid client id!!!").build());
-
-            } else {
-                sharedSecret = application.getClientSecret();
-            }
-
-        } else {
-            final Response.ResponseBuilder responseBuilder = Response.status(HttpServletResponse.SC_FOUND);
-
-            throw new WebApplicationException(
-                    responseBuilder.entity("OAuth client id needs to be provided by client!!!").build());
+        if (Utils.isEmpty(clientId) || Utils.isEmpty(clientSecret) || Utils.isEmpty(code)) {
+            return new ErrorResponse("Missing field!").build();
         }
 
-//        if (!clientId.equals(hashMap.get(OAuth.OAUTH_CLIENT_ID))) {
-//            OAuthResponse response =
-//                    OAuthASResponse.errorResponse(HttpServletResponse.SC_BAD_REQUEST)
-//                            .setError(OAuthError.TokenResponse.INVALID_CLIENT).setErrorDescription("client_id not found")
-//                            .buildJSONMessage();
-//            return Response.status(response.getResponseStatus()).entity(response.getBody()).build();
-//        }
-
-        if (!sharedSecret.equals(hashMap.get(OAuth.OAUTH_CLIENT_SECRET))) {
-            OAuthResponse response =
-                    OAuthASResponse.errorResponse(HttpServletResponse.SC_BAD_REQUEST)
-                            .setError(OAuthError.TokenResponse.INVALID_REQUEST).setErrorDescription("shared secret does not match")
-                            .buildJSONMessage();
-            return Response.status(response.getResponseStatus()).entity(response.getBody()).build();
+        final ApplicationRegistry application = DbUtils.getApplication(clientId);
+        if (application == null) {
+            return new ErrorResponse("client_id " + clientId + " is not a valid client id!").build();
         }
 
+        if (!application.getClientSecret().equals(clientSecret)) {
+            return new ErrorResponse("client_secret does not match client_id").build();
+        }
 
-        OAuthIssuer oauthIssuerImpl = new OAuthIssuerImpl(new MD5Generator());
-        String accessToken = oauthIssuerImpl.accessToken();
-        System.out.println("access token is " + accessToken);
-        OAuthResponse response = OAuthASResponse
-                .tokenResponse(HttpServletResponse.SC_OK)
-                .setAccessToken(accessToken)
-                .setExpiresIn("3600")
-                .buildJSONMessage();
+        final String accessToken = new MD5Generator().generateValue();
 
-        CodeToAccount code = ObjectifyService.ofy().load().key(Key.create(CodeToAccount.class, hashMap.get(OAuth.OAUTH_CODE))).now();
-        if (code != null) {
+        final CodeToAccount accountCode = DbUtils.getCodeToAccount(code);
+        if (accountCode != null) {
             Account account = null;
-            if (!code.getAccount().isLoaded()) {
-                account = ObjectifyService.ofy().load().key(code.getAccount().getKey()).now();
+            if (!accountCode.getAccount().isLoaded()) {
+                account = ObjectifyService.ofy().load().key(accountCode.getAccount().getKey()).now();
             }
-            AccessToken at = new AccessToken(accessToken, account);
+
+            final AccessToken at = new AccessToken(accessToken, account);
             ObjectifyService.ofy().save().entity(at).now();
         }
 
+        final JSONObject result = new JSONObject()
+                .put("access_token", accessToken)
+                .put("expires_in", 3600);
 
-        return Response.status(response.getResponseStatus()).entity(response.getBody()).build();
+        return Response.ok(result.toString()).build();
     }
-
 }
