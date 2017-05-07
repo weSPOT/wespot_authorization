@@ -31,7 +31,7 @@ import net.wespot.utils.ErrorResponse;
 
 /**
  * ****************************************************************************
- * Copyright (C) 2013 Open Universiteit Nederland
+ * Copyright (C) 2013-2017 Open Universiteit Nederland
  * <p/>
  * This library is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -46,7 +46,7 @@ import net.wespot.utils.ErrorResponse;
  * You should have received a copy of the GNU Lesser General Public License
  * along with this library.  If not, see <http://www.gnu.org/licenses/>.
  * <p/>
- * Contributors: Stefaan Ternier
+ * Contributors: Stefaan Ternier, Rafael Klaessen
  * ****************************************************************************
  */
 @Path("/auth")
@@ -100,11 +100,11 @@ public class AuthEndpoint implements Endpoint {
 
         if (clientId == null) {
             return new ErrorResponse("OAuth client id needs to be provided by client!").build();
-        } else if (clientId != null && DbUtils.getApplication(clientId) == null) {
+        } else if (DbUtils.getApplication(clientId) == null) {
             return new ErrorResponse("client_id " + clientId + " is not a valid client id!").build();
         }
 
-        if (redirectUri == null || !Utils.validUri(redirectUri)) {
+        if (redirectUri == null || !Utils.isValidUri(redirectUri)) {
             return new ErrorResponse("Invalid redirect uri").build();
         }
 

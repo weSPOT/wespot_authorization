@@ -31,7 +31,7 @@ import net.wespot.utils.SuccessResponse;
 
 /**
  * ****************************************************************************
- * Copyright (C) 2013 Open Universiteit Nederland
+ * Copyright (C) 2013-2017 Open Universiteit Nederland
  * <p/>
  * This library is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -46,7 +46,7 @@ import net.wespot.utils.SuccessResponse;
  * You should have received a copy of the GNU Lesser General Public License
  * along with this library.  If not, see <http://www.gnu.org/licenses/>.
  * <p/>
- * Contributors: Stefaan Ternier
+ * Contributors: Stefaan Ternier, Rafael Klaessen
  * ****************************************************************************
  */
 @Path("/account")
@@ -82,7 +82,7 @@ public class AccountService {
 
             final String email = accountJson.getString("email");
 
-            if (!Utils.validEmail(email)) {
+            if (!Utils.isValidEmail(email)) {
                 return new ErrorResponse("Invalid email address").build();
             }
 

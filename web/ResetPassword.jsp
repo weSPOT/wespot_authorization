@@ -1,6 +1,5 @@
 <%@ page import="net.wespot.oauth2.provider.AccountService" %>
 <%@ page import="net.wespot.db.AccountReset" %>
-<%@ page import="sun.tools.jar.resources.jar" %>
 <%@ page import="net.wespot.oauth2.provider.MailDelegator" %>
 <%@ page import="net.wespot.db.Account" %>
 <%@ page import="net.wespot.utils.DbUtils" %>

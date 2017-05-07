@@ -2,6 +2,7 @@
 <%@ page import="java.util.List" %>
 <%@ page import="java.util.ArrayList" %>
 <%@ page import="net.wespot.utils.Utils" %>
+<%@ page import="net.wespot.utils.DbUtils" %>
 <!DOCTYPE html>
 <html>
 <head lang="en">
@@ -34,12 +35,12 @@
     if (passwordagain != null && "".equals(passwordagain.trim())) incorrectFields.add("passwordagain");
 
     boolean nameExists = false;
-    if (username != null && !"".equals(username) && new AccountService().accountExists(username).contains("true")) {
+    if (username != null && !"".equals(username.trim()) && DbUtils.getAccount(username) != null) {
         nameExists = true;
     }
 
     if (email != null) {
-        if (!Utils.validEmail(email) && !incorrectFields.contains("email")) {
+        if (!Utils.isValidEmail(email) && !incorrectFields.contains("email")) {
             incorrectFields.add("email");
         }
     }
